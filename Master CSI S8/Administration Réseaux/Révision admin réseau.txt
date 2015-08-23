@@ -1,0 +1,128 @@
+ Pour mettre en mode paserelle
+
+/proc/sys/net/ipv4/ip-forward
+
+route del default
+route add default gw @ 
+
+
+Politique par default
+iptables -P INPUT ACCECPT
+
+Nat
+iptables -t nat -P FORWARD ACCEPT
+
+
+changer les adresse 
+ifconfig ethx @ip netmask 255.255.255.0
+ifconfig ethx @ip/24 c'es la même chose.
+
+
+Pour les config, Verifier :
+- @ip ifconfig
+- Routege route
+- firewall (iptables)
+
+
+
+
+TP1- ifconfig
+
+ifconfig eth0 172.16.0.1 netmask 255.255.255.0 broadcast 172.16.0.255
+ping -b 172.16.0.255
+
+/etc/network/interfaces
+auto lo
+iface lo inet loapback
+
+DHCP
+auto eth0
+iface eth0 inet dhcp
+
+FIXE
+iface eth0 inet static
+	address ______
+	netmask ______
+	broadcast ____
+	[gateway ______] 
+
+
+TP2- Routage
+Machine passerelle ---> /etc/sysctl.conf
+			net.ipv4.ip-forward=1
+		lancer sysctl -p
+route
+(1)route add default gw 147.210.12.1 dev eth1
+(2)route add -net 147.210.13.0 gw 147.210.12.2 netmask 255.255.255.0 dev eth0
+
+(1)Passerelle pour acceder  au reste
+(2) route add -net [Réseau à atteindre] gw [ip passerelle connue] netmask ... dev [interface sortante] 
+
+TP4 - NAT
+
+Associations adresse privée/adresse publique FIXE
+								       (*)
+172.16.0.2            172.16.0.1                89.16.0.1    eth0     <---           89.16.0.2
+
+
+(*)iptables -t NAT -A PREROUTING -d 89.16.0.1 -i eth0 -j DNAT --to-destination 172.16.0.2
+iptables -t NAT -A POSTROUTING -s 172.16.0.2 -o eth0 -j SNAT --to-source 89.16.0.1
+
+associations adresses privées/publique DYNAMIQUE
+iptables -t nat A POSTROUTING -o [interface exterieur] -s [réseau] -j MASQUERADE
+
+TP5 Firewall
+
+Politique par default
+iptables -P INPUT DROP
+
+Autoriser traffic sortant vers http(80) ssh(22) sur réseau
+iptables -A FORWARD -s 172.16.0/24 -p tcp -m multiport --dport 80,20 -j ACCEPT
+iptables -A FORWARD -d 172.16.0/24 -p tcp -m multiport --sport 80,20 -j ACCEPT
+
+Autoriser port sur une machine
+iptables -A FORWARD -s 172.16.0.3 -p tcp --dport 90 -j ACCEPT
+iptables -A FORWARD -d 172.16.0.3 -p tcp --sport 90 -j ACCEPT
+
+Limiter 5 connexion /min par machine
+iptables -A FORWARD -d 172.16.0.3 -p tcp --sport 22 --syn -m limit --limit 5/min -j ACCEPT
+
+Reste des paquets LOG
+iptables -A INPUT -j LOG
+iptables -A OUTPUT -j LOG
+
+Utiliser nmap pour verifier
+ATTENTION A L'ORDRE DES LIGNES
+
+TP7 - NIS/NFS
+
+NIS 
+Serveur NIS
+/etc/defaultdomain --> metal
+/etc/default/nis   -->NISSERVEUR=master
+		      NISCLIENT =true
+domain_name metal
+cd /var/yp ->make
+/etc/init.d/nis restart
+
+Client NIS
+/etc/defaultdomain --> metal
+/etc/default/nis --> NISCLIENT = true
+domaine metal
+/etc/nsswitch.conf -->  passwd files nis
+			group  files nis
+			shadow files nis
+/etc/yp.conf --> domain metal
+		 ypserveur @ip serveur
+
+Test:   ypwhich
+	ypcat passwd
+
+NFS(serveur NFS hébergeur)
+créer répertoire /exports
+/etc/exports -->/exports @ip(serveur NIS)(rw,no_root_squash)
+		/exports 192.168.0.0/24(rw)
+
+Clients NFS
+/etc/fstab --> 192.168.0.2:/exports /home nfs 
+		@ip hebergeur NIS

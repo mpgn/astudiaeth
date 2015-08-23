@@ -1,0 +1,17 @@
+
+
+
+{Recip(n,s)=
+local(p,q,G,D,bon,mauvais);
+bon=0;mauvais=0;
+for(k=1,n,
+p=nextprime(random(10^s));
+q=nextprime(random(10^s));
+if(p==q,,
+if(((p%4)==3)*((q%4)==3),D=-1,D=1);
+G=centerlift(Mod(p,q)^((q-1)/2))*centerlift(Mod(q,p)^((p-1)/2));
+if(G==D,bon=bon+1,mauvais=mauvais+1);
+););
+print([n,bon,mauvais]);
+}
+

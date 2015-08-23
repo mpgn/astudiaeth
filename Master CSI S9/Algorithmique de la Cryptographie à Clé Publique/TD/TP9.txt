@@ -1,0 +1,54 @@
+default(colors,darkbg)
+
+p = nextprime(random(2*10^3));
+g = Mod(3,p);
+h = Mod(5,p);
+
+b=5;
+B=prime(b);
+
+{friable(n,B)=
+local(q);
+q=n;
+forprime(p=2,B,while(q%p==0,q=q/p));
+return((q==1));
+}
+
+{relation(p,g,h,B)=
+local(a,x);
+until(friable(x,B),a=random(p-1);x=centerlift(g^a*h));
+return([a,x]);
+}
+
+
+
+{exposants(x,b,B)=
+local(i,y,ex);
+y=x;
+ex=vector(b);
+i=0;
+forprime(p=2,B,i=i+1;while(y%p==0,y=y/p;ex[i]=ex[i]+1));
+return(ex);
+}
+
+
+{ligne(p,g,h,b,B)=
+local(rel,l);
+rel=relation(p,g,h,B);
+l=[rel[1],1];
+return(concat(l,exposants(rel[2],b,B)));
+}
+
+
+
+
+M=[];
+for(k=1,b+6,M=concat(M,[ligne(p,g,h,b,B)]~));
+M=Mat(M);
+
+K=matrix(b+2,b+2,i,j,(i==j)*(p-1))
+
+N= concat(M~,K)
+
+mathnf(N)
+

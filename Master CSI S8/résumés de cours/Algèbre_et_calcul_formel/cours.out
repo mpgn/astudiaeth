@@ -1,0 +1,29 @@
+\BOOKMARK [0][-]{chapter.1}{Op\351rations et structures fondamentales}{}
+\BOOKMARK [1][-]{section.1.1}{Z et R[X], R anneau commutatif unitaire}{chapter.1}
+\BOOKMARK [1][-]{section.1.2}{Addition/Soustraction}{chapter.1}
+\BOOKMARK [1][-]{section.1.3}{Multiplications}{chapter.1}
+\BOOKMARK [1][-]{section.1.4}{Division Euclidienne}{chapter.1}
+\BOOKMARK [1][-]{section.1.5}{Algorithmes sous-quadratiques}{chapter.1}
+\BOOKMARK [1][-]{section.1.6}{Structures fondamentales}{chapter.1}
+\BOOKMARK [2][-]{subsection.1.6.1}{Fractions \040Q, K[X]}{section.1.6}
+\BOOKMARK [2][-]{subsection.1.6.2}{Quotients \040Z/n Z, K[X]/\(T\)}{section.1.6}
+\BOOKMARK [1][-]{section.1.7}{Compl\351tions R, K[[T]]}{chapter.1}
+\BOOKMARK [2][-]{subsection.1.7.1}{R}{section.1.7}
+\BOOKMARK [2][-]{subsection.1.7.2}{K[[T]]}{section.1.7}
+\BOOKMARK [1][-]{section.1.8}{Nombres alg\351briques}{chapter.1}
+\BOOKMARK [0][-]{chapter.2}{Quelques algorithmes arithm\351tiques fondamentaux}{}
+\BOOKMARK [1][-]{section.2.1}{Euclide}{chapter.2}
+\BOOKMARK [1][-]{section.2.2}{Crible d'Eratosth\350ne}{chapter.2}
+\BOOKMARK [1][-]{section.2.3}{Exponentiation binaire}{chapter.2}
+\BOOKMARK [1][-]{section.2.4}{Symbole de Legendre / de Jacobi}{chapter.2}
+\BOOKMARK [2][-]{subsection.2.4.1}{p premier impair}{section.2.4}
+\BOOKMARK [2][-]{subsection.2.4.2}{Symbole de Jacobi}{section.2.4}
+\BOOKMARK [1][-]{section.2.5}{Test de non-primalit\351 sur Z}{chapter.2}
+\BOOKMARK [1][-]{section.2.6}{Test de primalit\351 sur Z}{chapter.2}
+\BOOKMARK [1][-]{section.2.7}{Factorisation dans Z}{chapter.2}
+\BOOKMARK [1][-]{section.2.8}{Factorisation dans Fq\(\)}{chapter.2}
+\BOOKMARK [0][-]{chapter.3}{Syst\350mes polynomiaux}{}
+\BOOKMARK [1][-]{section.3.1}{Ordres monomiaux sur k[x1,\203,xn], k corps}{chapter.3}
+\BOOKMARK [1][-]{section.3.2}{Pseudo division euclidienne}{chapter.3}
+\BOOKMARK [1][-]{section.3.3}{R\351sultats, Applications}{chapter.3}
+\BOOKMARK [1][-]{section.3.4}{R\351soudre les syst\350mes d'\351quations polynomiales}{chapter.3}

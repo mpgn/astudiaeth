@@ -1,0 +1,108 @@
+\select@language {french}
+\contentsline {chapter}{\numberline {1}Rappels de probabilit\IeC {\'e}s}{2}
+\contentsline {section}{\numberline {1.1}D\IeC {\'e}finitions}{2}
+\contentsline {paragraph}{D\IeC {\'e}finition : Probabilit\IeC {\'e}\\}{2}
+\contentsline {paragraph}{D\IeC {\'e}finition : Variable al\IeC {\'e}atoire\\}{2}
+\contentsline {paragraph}{D\IeC {\'e}finition : Esp\IeC {\'e}rance de X\\}{2}
+\contentsline {paragraph}{Th\IeC {\'e}or\IeC {\`e}me\\}{2}
+\contentsline {paragraph}{D\IeC {\'e}finition : Fonctions indicatrices\\}{2}
+\contentsline {section}{\numberline {1.2}Probabilit\IeC {\'e}s conditionnelles, ind\IeC {\'e}pendance}{3}
+\contentsline {paragraph}{D\IeC {\'e}finition\\}{3}
+\contentsline {paragraph}{Th\IeC {\'e}or\IeC {\`e}me\\}{3}
+\contentsline {paragraph}{Th\IeC {\'e}or\IeC {\`e}me : In\IeC {\'e}galit\IeC {\'e} de Markov\\}{3}
+\contentsline {paragraph}{Loi des grands nombres\\}{3}
+\contentsline {paragraph}{D\IeC {\'e}finition : Variance\\}{3}
+\contentsline {paragraph}{Th\IeC {\'e}or\IeC {\`e}me de Tchebichev\\}{3}
+\contentsline {paragraph}{Th\IeC {\'e}or\IeC {\`e}me\\}{3}
+\contentsline {section}{\numberline {1.3}Mesure de l'information}{4}
+\contentsline {paragraph}{D\IeC {\'e}finition : Entropie\\}{4}
+\contentsline {paragraph}{D\IeC {\'e}finition\\}{4}
+\contentsline {chapter}{\numberline {2}Grandeurs Informationelles}{5}
+\contentsline {paragraph}{Rappels\\}{5}
+\contentsline {paragraph}{D\IeC {\'e}finition : Distance de Kullback\\}{5}
+\contentsline {paragraph}{Proposition\\}{5}
+\contentsline {paragraph}{Proposition\\}{5}
+\contentsline {paragraph}{Digression\\}{6}
+\contentsline {section}{\numberline {2.1}Entropie Conditionnelle}{6}
+\contentsline {paragraph}{D\IeC {\'e}finition\\}{6}
+\contentsline {paragraph}{Proposition\\}{6}
+\contentsline {paragraph}{D\IeC {\'e}finition : Information mutuelle \\}{6}
+\contentsline {paragraph}{Proposition\\}{6}
+\contentsline {section}{\numberline {2.2}Application la cryptologie}{7}
+\contentsline {paragraph}{Th\IeC {\'e}or\IeC {\`e}me\\}{7}
+\contentsline {section}{\numberline {2.3}Distance d'unicit\IeC {\'e}}{7}
+\contentsline {paragraph}{D\IeC {\'e}finition\\}{7}
+\contentsline {chapter}{\numberline {3}Codage de source (compressif)}{8}
+\contentsline {paragraph}{D\IeC {\'e}finition\\}{8}
+\contentsline {paragraph}{Cas particulier : Code pr\IeC {\'e}fixe\\}{8}
+\contentsline {paragraph}{Proposition\\}{8}
+\contentsline {paragraph}{Remarque\\}{8}
+\contentsline {paragraph}{D\IeC {\'e}finition : longueur de X\\}{8}
+\contentsline {paragraph}{Remarque\\}{8}
+\contentsline {paragraph}{Proposition\\}{9}
+\contentsline {paragraph}{Th\IeC {\'e}or\IeC {\`e}me de Kraft \\}{9}
+\contentsline {paragraph}{Th\IeC {\'e}or\IeC {\`e}me de McMillan\\}{9}
+\contentsline {paragraph}{Proposition\\}{9}
+\contentsline {paragraph}{Proposition\\}{9}
+\contentsline {paragraph}{Algorithme de Huffman\\}{9}
+\contentsline {paragraph}{Lemme\\}{9}
+\contentsline {chapter}{\numberline {4}Codage de canal}{11}
+\contentsline {section}{\numberline {4.1}Canal binaire sym\IeC {\'e}trique}{11}
+\contentsline {paragraph}{Analyse "nave"\\}{12}
+\contentsline {paragraph}{Quel est le rendement maximum ?\\}{12}
+\contentsline {paragraph}{D\IeC {\'e}finition\\}{12}
+\contentsline {paragraph}{Exemple pour le canal binaire sym\IeC {\'e}trique\\}{12}
+\contentsline {section}{\numberline {4.2}Canal binaire \IeC {\`a} effacements\\}{12}
+\contentsline {section}{\numberline {4.3}Canal en "Z"}{13}
+\contentsline {section}{\numberline {4.4}Clavier bruit\IeC {\'e}}{13}
+\contentsline {chapter}{\numberline {5}Codes correcteurs d'erreurs et d'effacements}{14}
+\contentsline {paragraph}{D\IeC {\'e}finition : distance minimale de C}{14}
+\contentsline {paragraph}{Proposition\\}{14}
+\contentsline {paragraph}{Proposition\\}{14}
+\contentsline {paragraph}{D\IeC {\'e}finition : dcodage au maximum de vraisemblance\\}{14}
+\contentsline {section}{\numberline {5.1}Codes lin\IeC {\'e}aires}{15}
+\contentsline {paragraph}{D\IeC {\'e}finition\\}{15}
+\contentsline {paragraph}{D\IeC {\'e}finition\\}{15}
+\contentsline {paragraph}{D\IeC {\'e}finition\\}{15}
+\contentsline {paragraph}{D\IeC {\'e}finition\\}{15}
+\contentsline {paragraph}{Proposition\\}{15}
+\contentsline {paragraph}{Autre d\IeC {\'e}finition d'un code :}{15}
+\contentsline {paragraph}{Passage de G \IeC {\`a} H ou de H \IeC {\`a} G}{16}
+\contentsline {subparagraph}{D\IeC {\'e}finition : produit scalaire dans $\mathbb {F}_2^n$\\}{16}
+\contentsline {subparagraph}{D\IeC {\'e}finition\\}{16}
+\contentsline {subparagraph}{D\IeC {\'e}finition\\}{16}
+\contentsline {subparagraph}{D\IeC {\'e}finition\\}{16}
+\contentsline {paragraph}{Dimensions:}{16}
+\contentsline {subparagraph}{Proposition\\}{16}
+\contentsline {subparagraph}{D\IeC {\'e}finition\\}{16}
+\contentsline {subparagraph}{Proposition\\}{16}
+\contentsline {subparagraph}{Proposition\\}{17}
+\contentsline {subparagraph}{Proposition\\}{17}
+\contentsline {subparagraph}{Proposition\\}{17}
+\contentsline {paragraph}{Codes parfaits de $\mathbb {F}_2^n$\\}{17}
+\contentsline {paragraph}{Distance 4}{17}
+\contentsline {subparagraph}{Remarque\\}{17}
+\contentsline {paragraph}{Distance 5\\}{17}
+\contentsline {paragraph}{Codes de grandes distances ? \\}{17}
+\contentsline {subparagraph}{Borne de Gilbert-Varshamov\\}{17}
+\contentsline {paragraph}{Existence de bons codes lin\IeC {\'e}aires\\}{18}
+\contentsline {subparagraph}{Remarque\\}{18}
+\contentsline {subparagraph}{Remarque\\}{19}
+\contentsline {paragraph}{Borne sup\IeC {\'e}rieure de Hamming\\}{19}
+\contentsline {paragraph}{Correction d'effacements et th\IeC {\'e}or\IeC {\`e}me de Shannon\\}{19}
+\contentsline {subparagraph}{Dcodage\\}{20}
+\contentsline {subparagraph}{Proposition\\}{20}
+\contentsline {paragraph}{Proposition\\}{20}
+\contentsline {paragraph}{Th\IeC {\'e}or\IeC {\`e}me de Shannon\\}{21}
+\contentsline {paragraph}{Remarque\\}{21}
+\contentsline {section}{\numberline {5.2}Canaux wire-tap}{21}
+\contentsline {paragraph}{Comment transmettre un bit ?}{21}
+\contentsline {paragraph}{Codage par syndrome\\}{22}
+\contentsline {paragraph}{Cas des effacements\\}{22}
+\contentsline {subparagraph}{Ensemble des vecteurs e\\}{22}
+\contentsline {paragraph}{Nouveau modle de canal wire tap\\}{23}
+\contentsline {paragraph}{Cas adversaire (Wire tap de type 2)\\}{23}
+\contentsline {paragraph}{Proposition\\}{24}
+\contentsline {paragraph}{D\IeC {\'e}finition : tableau orthogonal de force T\\}{24}
+\contentsline {paragraph}{Th\IeC {\'e}or\IeC {\`e}me\\}{24}
+\contentsline {paragraph}{Diffusion d'al\IeC {\'e}a\\}{24}

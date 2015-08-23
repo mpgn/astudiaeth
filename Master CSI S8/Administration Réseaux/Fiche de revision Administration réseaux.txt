@@ -1,0 +1,420 @@
+IP
+
+Syntaxe :
+ifconfig interface @IP netmask masque ...
+
+Exemples :
+    ifconfig eth0 (consulter la configuration de l’interface eth0)
+
+    ifconfig eth0 192.168.0.1 netmask 255.255.255.0
+    (configurer l’interface eth0)
+
+    ifconfig eth0 down (Suppression de la configuration de
+    l’interface eth0)
+
+Route
+
+Exemple :
+            route add default gw @passerelle (ajouter une
+            route par défaut)
+            route add -host @hôte gw @passerelle dev
+            iface (ajouter une route utilisant l’interface réseau
+            iface vers un hôte particulier)
+            route add -net @réseau netmask masque dev
+            iface gw @passerelle (ajouter une route utilisant
+            l’interface iface vers un réseau particulier)
+Pour les suppressions de route, il suffit de remplacer l’opération
+add par del.
+
+traceroute to vivaldi.emi.u-bordeaux.fr
+
+Mettre en mode routeur
+
+Deux méthodes peuvent être utilisée :
+   Modifier “à chaud” le paramètre qui contrôle la fonctionnalité :
+   echo 1 > /proc/sys/net/ipv4/ip_forward
+   Configuration automatique à chaque démarrage :
+   Ajout de net.ipv4.ip_forward=1 au fichier
+   /etc/sysctl.conf
+
+Firewall Filtrage des paquets
+
+Modification de la destination du paquet avant le routage (paquet
+reçu de l’extérieur).
+
+iptables -t nat -A PREROUTING -d 140.77.13.2 -i eth1 -j DNAT
+−−to-destination 192.168.0.2
+
+Modification de la source du paquet après le routage (paquet émis
+à partir du réseau privé).
+iptables -t nat -A POSTROUTING -s 192.168.0.2 -o eth1 -j
+SNAT −−to-source 140.77.13.2
+
+Exercice : Comment faire pour que le routeur puisse envoyer un
+paquet à l’adresse 140.77.13.2?
+Réponse :
+Il faut modifier la destination du paquet émis localement avant le
+routage.
+iptables -t nat -A OUTPUT -d 140.77.13.2 -j DNAT
+−−to-destination 192.168.0.2
+
+Association entre toutes les adresses privées du sous-réseau
+192.168.0.0/24 avec l’interface eth1.
+iptables -t nat -A POSTROUTING -o eth1 -s 192.168.0.0/24 -j
+MASQUERADE
+
+Association entre toutes les adresses privées du sous-réseau
+192.168.1.0/24 avec l’interface eth2.
+iptables -t nat -A POSTROUTING -o eth2 -s 192.168.1.0/24 -j
+MASQUERADE
+
+Transférer les connexions sur le port 80 de l’adresse 140.77.13.2
+sur la machine ayant l’adresse privée 192.168.0.200 sur le port
+8080 :
+
+iptables -t nat -A PREROUTING -p tcp -d 140.77.13.2 −−dport
+80 −−sport 1024:65535 -j DNAT −−to 192.168.0.200:8080
+
+Firewall
+
+Accepter tous les paquets en provenance de n’importe où et
+destinés à l’adresse du routeur 192.168.1.1.
+iptables -A INPUT -s 0/0 -i eth0 -d 192.168.1.1 -p TCP
+-j ACCEPT
+
+Accepter de router les paquets entrant sur eth0 tels que :
+               @source    @dest      P-source        P-dest
+                 0/0   192.168.1.58 1024-65535          80
+iptables -A FORWARD -s 0/0 -i eth0 -d 192.168.1.58 -o
+eth1 -p TCP −−sport 1024:65535 −−dport 80 -j ACCEPT
+
+Accepter un paquet ICMP “echo-request” (ping) par seconde
+iptables -A INPUT -p icmp −−icmp-type echo-request -m
+limit −−limit 1/s -i eth0 -j ACCEPT
+
+Accepter 5 segments TCP ayant le bit SYN positionné par
+seconde (permet d’éviter de se faire inonder)
+iptables -A INPUT -p tcp −−syn -m limit −−limit 5/s -i
+eth0 -j ACCEPT
+
+Accepter de router les paquets entrants sur eth0 tels que :
+          @source    @dest              P-source       P-dest
+            0/0   192.168.1.58         1024-65535    80 ou 443
+iptables -A FORWARD -s 0/0 -i eth0 -d 192.168.1.58 -o
+eth1 -p TCP −−sport 1024:65535 -m multiport −−dport
+80,443 -j ACCEPT
+
+Suivi des connexions disponible (conntrack)
+Quatre états possibles pour une connexion :
+NEW . Nouvelle connexion établie
+ESTABLISHED . La connexion analysée est déjà établie
+RELATED . La connexion est en relation avec une
+connexion déjà établie (ftp-data par exemple)
+INVALID . Le paquet reçu n’appartient à aucune des
+trois catégories précédentes.
+
+Exemples :
+
+Autoriser tous les paquets émis par le routeur concernant des
+connexions déjà établies.
+iptables -A OUTPUT -o eth0 -m state −−state
+ESTABLISHED,RELATED -j ACCEPT
+
+Autoriser le routeur à relayer tous les paquets reçus
+concernant de nouvelles connexions sur le port 22.
+iptables -A FORWARD -p tcp -i eth0 −−dport 22 −−sport
+1024:65535 -m state −−state NEW -j ACCEPT
+
+Traces iptables. Possibilité de tracer certaines actions iptables.
+exemple :
+1. Tracer toutes les actions iptables :
+iptables -A OUTPUT -j LOG
+iptables -A INPUT -j LOG
+iptables -A FORWARD -j LOG
+2. Rajouter une règle pour tracer les paquets rejetés
+iptables -N LOG_DROP
+iptables -A LOG_DROP -j LOG −−log-prefix
+’[IPTABLES DROP] : ’
+iptables -A LOG_DROP -j DROP
+
+nmap, nessus,. . . . Logiciels permettant de diagnostiquer l’état d’un
+firewall (trouver les ports ouverts, détecter les services
+utilisant les ports, . . . )
+
+NIS
+
+Les maps sont stockées dans le répertoire :
+/var/yp/nom_de_domaine
+Quand le fichier source d’une map est modifié sur le serveur
+(ajout d’un utilisateur, changement de mot de passe,. . . ), il faut
+regénérer la map associée et enventuellement propager les
+modifications aux serveurs NIS esclaves
+Chaque map stocke des couples clé/valeur
+                       cd /var/yp
+    /etc/hosts                       hosts.byname
+    ....
+    ....                                               Diffusion
+                                     hosts.byaddr
+                           make
+                                    passwd.byname     aux esclaves
+    /etc/passwd
+    ...                              passwd.byuid
+    ...
+
+    La commande ypcat permet de voir le contenu d’une map
+    depuis n’importe quel client
+    Au niveau d’Un client NIS :
+           il est nécessaire de se lier (binding) à un serveur pour pouvoir
+           l’interroger
+               r deux méthodes : diffusion (traiter la première réponse) ou
+                 désignation explicite d’un serveur
+               r nom de domaine positionné à l’aide de la commande
+                 domainname ou dans le fichier /etc/defaultdomain, . . .
+               r Le demon ypbind doit tourner pour rechercher régulièrement le
+                 serveur approprié.
+           ypwhich permet de connaître le nom du serveur NIS
+           ypset permet de positionner le nom du serveur (pour désignier
+           explicitement un serveur NIS)
+           possibilité de configuration du nom du serveur NIS
+           correspondant à un nom de domaine dans le fichier
+           /etc/yp.conf :
+           domain nom_de_domaine
+           ypserver nom_de_serveur
+
+2 méthodes :
+nsswitch.conf :
+    Détermine l’ordre de recherche pour l’authentification des
+    utilisateurs.
+    hosts:          files dns nis
+    networks: nis files
+    pour les entrées passwd, group et shadow : 2 solutions
+    passwd:          files nis
+    ou
+    passwd:          compat
+/etc/passwd :
+    Ajouter +:::::: à la fin de /etc/passwd au niveau du client.
+    Remarque :
+    Il suffit de remplacer “+” par “-” pour exclure les utilisateurs NIS
+    d’une marchine.
+      A. Guermouche                         Cours 6 : NIS               12
+                     Configuration de NIS
+Configuration du serveur
+   Un serveur NIS esclave doit faire tourner :
+       ypserv pour répondre aux requêtes de ses clients NIS
+       ypbind s’il est lui-même un client NIS (n’est pas obligatoire)
+   Un serveur NIS maître doit faire tourner :
+       ypserv pour répondre aux requêtes de ses clients NIS
+       ypbind s’il est lui-même un client NIS (n’est pas obligatoire)
+       ypxfrd pour répondre aux demandes de mise à jour des maps
+       de la part des serveurs esclaves
+       rpc.yppasswd pour assurer les demandes de changement de
+       mot de passe (passwd)
+
+NFS SAMBA
+
+Principe d’authentification :
+    (uid, gid)local “mappé” sur (uid, gid)distant
+                  → équivalence entre les droits locaux et les droits
+                     distants
+    Problème pour root :
+           Quels droits possède le root d’une machine cliente sur les
+           fichiers exportés par un serveur NFS?
+           par défaut root (coté client) correspond a l’utilisateur nobody
+           (coté serveur) pour des raisons de sécurité (sinon il faut mettre
+           l’option no_root_squash dans /etc/exports)
+Règle de non transitivité :
+    Si A exporte /home à B; Si B monte A:/home dans /home2 et
+    exporte /home2 à C alors C n’aura pas accès au /home de A
+Liens symboliques :
+    Les liens symboliques relatifs sont interprétés par rapport au
+    système de fichier du client.
+
+Démons importants utilisés par NFS :
+  portmap. Gestion des connexions des applications utilisant le
+               mécanisme de RPC.
+       nfsd. Authentification + Création, recherche, lecture et
+               écriture de fichiers
+   mountd. Montage des systèmes exportés (mount et umount)
+      statd. Surveillance des nœuds du réseau (redémarrages. . . )
+     lockd. Section critique (lock les fichiers utilisés)
+
+ coté client. le fichier /etc/fstab doit contenir le chemin vers le
+                point de montage et le chemin sur le serveur NFS.
+                192.168.0.1:/home /nfs nfs defaults,noauto
+                0 0
+coté serveur. le fichier /etc/exports contient le chemin vers les
+                dossiers à exporter ainsi
+                que la liste les machines autorisées à y accéder. /home
+                192.168.1.0/255.255.255.0(rw,no_root_squash)
+Après chaque modification de /etc/exports il est nécessaire :
+    soit d’exécuter exportfs pour transmettre les modifications
+    au serveur nfs
+    soit de relancer le serveur NFS
+
+SMB : Server Message Block
+  Protocole de Microsoft et Intel permettant le partage de
+  ressources (disques, imprimantes, . . . ) à travers un réseau
+  (1987)
+  SMB est prévu pour être utilisé au dessus de l’interface
+  NetBIOS
+         Utilisation des noms NetBIOS (15 caractères + 1 pour le type)
+         Utilisation du mécanisme de datagramme de NetBIOS par
+         broadcast comme service de nommage (nom → MAC, pas
+         d’adresse de niveau 3)
+                                  Application
+                                    SMB
+                                   NetBIOS
+                          TCP/IP NetBEUI IPX/SPX
+                                                ...
+                                     PPP
+                           802.x
+
+  Chaque machine client ou serveur possède un nom sur 15
+  caractères
+  SMB ajoute un 16ème caractère pour distinguer les serveurs
+  de fichiers, les clients, les imprimantes, . . .
+  Notion de domaine
+         un ensemble d’utilisateurs (avec nom et mot de passe) et de
+         serveurs (avec des droits d’accès)
+         un primary domain server contient la base de données des
+         utilisateurs et de leur mot de passe
+  Un serveur une ou plusieurs ressources
+         fichiers, imprimantes, . . .
+         à chaque triplet (domaine, serveur, ressource) correspond un
+         nom unique : \\serveur\ressource
+
+Deux niveaux de protection :
+    au niveau de chaque utilisateur : basé sur le nom des
+    utilisateurs, permet de gérer l’accès aux ressources voire aux
+    éléments d’une ressource
+    au niveau de chaque ressource : un mot de passe commun à
+    tous les utilisateurs est associé à une ressource pour y
+    autoriser l’accès
+Résolution de noms : 4 méthodes utilisées
+ broadcast. résolution par diffusion d’une requête dans le réseau
+    lmhost. résolution en utilisant des associations prédéfinies
+                entre noms NetBIOS et IP
+        host. utilisation de DNS
+       wins. utilisation d’un serveur WINS (Windows Internet
+                Name Server). À chaque machine est associé un
+                serveur WINS à qui elle envoie ses requêtes et auprès
+                duquel elle s’enregistre.
+
+Samba : Implémentation de SMB sous UNIX qui permet le partage
+de ressources entre les mondes UNIX et Windows
+Samba permet de :
+    partager un disque UNIX pour des machines Windows
+    accéder à un disque Windows depuis une machine UNIX
+    partager une imprimante UNIX pour des machines Windows
+    utiliser une imprimante Windows à partir d’un hôte Linux.
+Le serveur Samba sur la machine Unix émule un domaine SMB
+
+Serveur Samba :
+     configuration via le fichier /etc/smb.conf
+     travail partagé par deux démons :
+            smbd. pour le service “serveur”
+            nmbd. pour le service résolution des noms NetBIOS
+Client :
+smbpasswd. permet de changer le mot de passe d’un utilisateur
+              SMB
+ smbclient. permet d’interroger un serveur Samba depuis UNIX
+              smbclient //host/ressource permet l’accès à
+              la ressource
+Possibilité de monter une partition Windows distante à l’aide de
+Samba → utiliser le système de fichier smbfs
+Exemple : (extrait du fichier /etc/fstab)
+//serveur/ressource /commun smbfs defaults 0 0
+
+LDAP
+
+base /etc/passwd des comptes unix
+base /etc/aliases (ou Sympa) des listes de diffusion
+
+Il faut bien choisir les schémas
+      Quelles informations veut-on stocker dans l’annuaire?
+      Quelles sont les applications qui vont utiliser l’annuaire?
+Il faut réfléchir a l’organisation du DIT
+      impact sur la performance, les droits d’accès, . . .
+Puis dans un deuxième temps
+      gestion centralisée sur un seul serveur?
+      nombre de serveurs redondants? Emplacement?
+
+OpenLDAP
+
+   Logiciel LDAP du domaine public
+   le démon slapd
+                 → traite les requêtes LDAP
+   le démon slurpd
+                 → permet la réplication
+   des librairies LDAP
+          par exemple pour authentifier les logins via LDAP :
+          libpamldap, libnssldap
+   des utilitaires :
+          ldapadd, ldapdelete, ldapmodify, ldapmodrdn,
+          ldappasswd, ldapsearch
+
+Configuration du serveur ldap(1/2)
+
+Le fichier /etc/ldap/slapd.conf permet de configurer le
+démon sladp
+    définition des schémas utilisés
+    include inetorgperson.schema
+    définition du backend (type de la base de données utilisée)
+    backend bdb
+    définition de la base, de l’annuaire et de l’administrateur
+           le suffixe (racine de l’arbre)
+           suffix "dc=labri,dc=fr"
+           l’administrateur et son mot de passe
+           rootdn “cn=Manager,dc=labri,dc=fr”
+           rootpw MD5x0dg9sP0uUf+NRm0MIPz7Q==
+           le répertoire où la base est stockée
+           directory "/var/lib/ldap"
+
+Configuration du serveur ldap(1/2)
+
+Définition des ACLs (man slapd.access)
+ # par défaut
+access to attrs=userPassword
+                by dn="cn=admin,dc=com" write # l’admin
+                by anonymous auth # droit de lecture lors du
+                bind
+                by self write # le propriétaire
+                by * none
+access to dn.base="" by * read
+# L’administrateur a un accès total en écriture, tous
+# les autres utilisateurs peuvent tout lire.
+access to *
+                by dn="cn=admin,dc=com" write
+                by * read
+
+configuration du client LDAP
+
+ La configuration se fait grâce au fichier /etc/ldap/ldap.conf
+     man ldap.conf
+     peut aussi se faire dans /.ldaprc
+     exemple de fichier ldap.conf
+     # base par défaut à contacter pour les opérations LDAP
+     BASE dc=labri, dc=fr
+     # en tant que qui le client va se connecter
+     # à la base
+     BINDDN uid=toto,ou=People,dc=labri,dc=fr
+     # le serveur auquel se connecter
+     URI ldap://147.210.20.21:389/
+
+Authentification Unix via LDAP
+
+    PAM (Pluggable Authentication Modules)
+         permet de gérer la politique d’authentification sans
+         recompilation
+         pour authentifier via LDAP, il faut ajouter la ligne auth
+         sufficient pam_ldap.so (qui signifie que l’authentification
+         LDAP est suffisante) dans le fichier
+         /etc/pam.d/common-auth. Il faut faire de même pour tous
+         les autres fichiers /etc/pam.d/common-*.
+         Modifier éventuellement /etc/pam.d/ssh,. . .
+    Configurer l’accès à la base dans /etc/libnss-ldap.conf
+    et /etc/pam_ldap.conf (voir pages man)
+    Indiquer dans /etc/nsswitch.conf l’ordre d’interrogation
+    pour l’authentification
+               → toujours laisser files en premier !
+

@@ -1,0 +1,968 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[francais]{babel}
+\usepackage[pdftex]{graphicx}
+\usepackage [utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[colorlinks=true,linkcolor=black,urlcolor=black]{hyperref}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{subfigure}
+\renewcommand{\algorithmicrequire} {\textbf{\textsc{Entrées:}}}
+\renewcommand{\algorithmicensure}  {\textbf{\textsc{Sorties:}}}
+\renewcommand{\algorithmicwhile}   {\textbf{Tant que}}
+\renewcommand{\algorithmicdo}      {\textbf{Faire}}
+\renewcommand{\algorithmicendwhile}{\textbf{Fin tant que}}
+\renewcommand{\algorithmicend}     {\textbf{Fin}}
+\renewcommand{\algorithmicif}      {\textbf{Si}}
+\renewcommand{\algorithmicendif}   {\textbf{Fin si}}
+\renewcommand{\algorithmicelse}    {\textbf{Sinon}}
+\renewcommand{\algorithmicthen}    {\textbf{Alors}}
+\renewcommand{\algorithmicfor}     {\textbf{Pour}}
+\renewcommand{\algorithmicforall}  {\textbf{Pour tout}}
+\renewcommand{\algorithmicdo}      {\textbf{Faire}}
+\renewcommand{\algorithmicendfor}  {\textbf{Fin pour}}
+\renewcommand{\algorithmicloop}    {\textbf{Boucler}}
+\renewcommand{\algorithmicendloop} {\textbf{Fin boucle}}
+\renewcommand{\algorithmicrepeat}  {\textbf{Répéter}}
+\renewcommand{\algorithmicuntil}   {\textbf{Jusqu'à}}
+\renewcommand{\algorithmicreturn}   {\textbf{Retourner}}
+
+\floatname{algorithm}{Algorithme}
+
+\let\mylistof\listof
+\renewcommand\listof[2]{\mylistof{algorithm}{Liste des algorithmes}}
+
+\makeatletter
+\providecommand*{\toclevel@algorithm}{0}
+\makeatother
+
+
+\title{\Huge{Cours d'Algèbre et Calcul Formel}}
+\author{Ecrit par Marion Candau \\\\
+Enseignant : M.Karim Belabas\\\\\\\\\\\\\
+Master 1 Cryptologie et Sécurité Informatique\\
+Université Bordeaux 1}
+\date{2009 - 2010}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage 
+
+\chapter{Opérations et structures fondamentales}
+\section{$\mathbb{Z}$ et R[X], R anneau commutatif unitaire}
+Représentation des données :\\
+\begin{itemize}
+\item Dans $\mathbb{Z}$, on fixe une base $\beta > 1$, en pratique 2,10 ou $2^{64}$. Tout entier $A \geqslant 1$ s'écrit de façon unique $ \displaystyle A=\sum_{i=0}^{n} a_i \beta^i$ avec $ a_i \in \{0,1,\ldots,\beta -1\}$ et $a_n \neq 0$. On a $n=\lfloor log_{\beta} A\rfloor + 1$.
+\item Dans R[X], tout $A \neq 0$ s'écrit $\displaystyle A=\sum_{i=0}^{n} a_i X^i$, avec $a_i \in R, a_n \neq 0 $.
+\end{itemize}
+On traite 0 séparément. La taille de A est l'entier n+1\\
+$ \rightarrow $ complexité mot-machine sur $\mathbb{Z}$ (binaire : $\beta =2$)\\
+$ \rightarrow $ complexité algébrique sur R[X]
+\section{Addition/Soustraction}
+\begin{algorithm}[h!]
+
+\begin{algorithmic}
+\REQUIRE $\displaystyle A=\sum_{i=0}^{n_A} a_i X^i$, $B = \displaystyle \sum_{i=0}^{n_B} b_i X^i$
+\ENSURE $ C=A+B \in R[X] $
+\FOR{$i=0$ à $max(n_A,n_B)$} 
+\STATE poser $c_i \leftarrow a_i + b_i$ \ENDFOR
+\RETURN $C=\displaystyle \sum_{i=0}^{max(n_A,n_B)}c_iX^i$, normalisé
+\STATE Coût : $1 + max(n_A,n_B) $ opérations dans R.
+\end{algorithmic}
+\caption{Addition dans R[X]}
+\end{algorithm}
+
+\begin{algorithm}[h!]
+
+\begin{algorithmic}
+\REQUIRE $\displaystyle A=\sum_{i=0}^{n_A} a_i \beta^i$, $B = \displaystyle \sum_{i=0}^{n_B} b_i \beta^i$
+\ENSURE $ C=A+B$
+\STATE $r\leftarrow 0$
+\FOR{$i=0$ à $max(n_A,n_B)$} 
+\STATE écrire $a_i + b_i + r = c_i + r'\beta$,  $ 0 \leqslant c_i < \beta$, $ r' = 0 $ ou $ 1$ 
+\STATE $ r \leftarrow r' $
+\ENDFOR
+\RETURN $c=\displaystyle \sum_{i=0}^{max(n_A,n_B)}c_i\beta^i + \left\{
+	\begin{array}{ll}
+        \displaystyle  \beta^{max(n_A,n_B)+1} & \mbox{si } r=1\\
+       \\
+        \displaystyle 0 & \mbox{si } r=0
+    \end{array}
+\right.$
+\STATE Coût : $max(n_A,n_B)+1$ opérations sur des mots-machines.
+\end{algorithmic}
+\caption{Addition dans $\mathbb{Z}$}
+\end{algorithm}
+
+\paragraph{Définition\\}
+On appelle complexité algébrique d'une opération le nombre d'opérations $(+,-,\times,/)$ dans l'anneau de base qu'elle utilise.\\
+On appelle complexité binaire d'une opération le nombre d'opérations $(+,-,\times,/)$ sur les mots-machines (chiffres) qu'elle utilise.
+\paragraph{Corollaire\\}
+L'addition dans $\mathbb{Z}$ ou R[X] s'effectue en complexité binaire ou algébrique, linéaire en la taille des opérandes.
+\paragraph{Remarque\\}
+\begin{enumerate}
+\item En pratique l'algorithme asymptotiquement meilleur ne l'est pas en "petites tailles".
+\item En pratique $2^{80}$ opérations $ = +\infty$
+\end{enumerate}
+\section{Multiplications}
+\begin{algorithm}[h!]
+\begin{algorithmic}
+\REQUIRE $\displaystyle A=\sum_{i=0}^{n_A} a_i X^i$, $B = \displaystyle \sum_{i=0}^{n_B} b_i X^i$ non nuls
+\ENSURE $ \displaystyle C=A\times B = \sum_{k=0}^{n_C\leqslant n_A+n_B} c_k X^k$ et $ \displaystyle c_k=\sum_{i+j=k} a_i b_j$
+\FOR{$k=0$ à $n_A+n_B$} 
+\STATE $c\leftarrow 0;$
+\FOR{$i=0$ à $k$}
+\STATE $c\leftarrow c + a_i\times b_{k-i}$
+\STATE $ c_k \leftarrow c $
+\ENDFOR
+\ENDFOR
+\RETURN $C=\displaystyle \sum_{k=0}^{n_A+n_B}c_k X^k $, normalisé
+\end{algorithmic}
+\caption{Multiplication dans R[X]}
+\end{algorithm}
+\paragraph{Complexité algébrique\\}
+$$\sum_{k=0}^{n_A+n_B} \sum_{i=0}^{k} 2 = O\left[(n_A+n_B)^2\right]$$
+\paragraph{Remarque\\}
+$$\sum_{k=0}^{N} k^{\alpha} = O(N^{\alpha + 1})$$
+$$ \# \{a_ib_j\}=(n_A+1)(n_B+1) $$
+\paragraph{Théorème\\}
+La complexité algébrique de cet algorithme est $ \leqslant 2\times (n_A+1)(n_B+1) = O\left((n_A+1)(n_B+1)\right) $.
+\paragraph{Définition : Landau}
+$f=O(g)$  au voisinage de $+\infty$ si $ \exists x_0$ tel que $ \forall x > x_0 $ on a :\\
+$$ |f(x)|\leqslant c(x_0)|g(x)| $$
+\paragraph{Définition\\}
+$ f\ll g$ si pour tout x on a : $ |f(x)| \leqslant c |g(x)| $.
+\begin{algorithm}[h!]
+\begin{algorithmic}
+\REQUIRE $\displaystyle A=\sum_{i=0}^{n_A} a_i \beta^i$, $b_i \in \{1,\ldots,\beta -1\}$ 
+\ENSURE $ A\times b=C= \sum c_i \beta^i$
+\FOR{$i=0$ à $n_A$} 
+\STATE écrire $a_ib+r = q\beta + s$,  $ 0 \leqslant s < \beta$, $ 0 \leqslant q < \beta $ 
+\STATE $ r\leftarrow q;$
+\STATE $ c_i \leftarrow s;$
+\ENDFOR
+\RETURN $r\beta^{n+1} + \sum_{i=0}^{n} c_i \beta^{i}$, normalisé
+\end{algorithmic}
+\caption{Sous Algorithme de multiplication dans $\mathbb{Z}$}
+\end{algorithm}
+\begin{algorithm}[h!]
+\begin{algorithmic}
+\REQUIRE $\displaystyle A=\sum_{i=0}^{n_A} a_i \beta^i$, $B = \displaystyle \sum_{i=0}^{n_B} b_i \beta^i$ non nuls
+\ENSURE $ A\times B$
+\FOR{$i=0$ à $n_B$} 
+\STATE $d_i \leftarrow b_i \times A $
+\ENDFOR
+\RETURN $c=\displaystyle \sum_{i=0}^{n_B}d_i\beta^i$
+\STATE Coût $\ll \sum_{j} n_A + 2 = (n_A+2)(n_B+1)=o($taille(A)$\times$taille(B))
+\end{algorithmic}
+\caption{Multiplication dans $\mathbb{Z}$}
+\end{algorithm}
+\paragraph{Corollaire\\}
+La multiplication dans $\mathbb{Z}$ ou R[X] s'effectue en complexité binaire ou algébrique en la taille de A $\times$ la taille de B.
+\section{Division Euclidienne}
+Dans R[X], $\exists A,B$ tel que $ cd(B) \in R^* (\Rightarrow B \neq 0)$ alors $ A=Bq+r$ avec $ deg(r) < deg(B)$, $q,r \in R[X]$ uniques.
+\begin{algorithm}[h!]
+\begin{algorithmic}
+\REQUIRE $\displaystyle A=\sum_{i=0}^{n_A} a_i X^i$, $\displaystyle B=\sum_{i=0}^{n_B} b_i X^i$ 
+\ENSURE $ A/B=q$ et $A \mod B = r$ tel que $ \displaystyle q= \sum_{i=0}^{n_A-n_B} q_i X^i$
+\STATE $ r\leftarrow A;$  $q \leftarrow 0;$
+\FOR{$i=n_A-n_B$ à $0$} 
+\IF{$deg(r) = n_B + i$}
+\STATE $q_i \leftarrow \frac{cd(r)}{cd(B)};$ 
+\STATE $ r\leftarrow r-q_iX^i - B$
+\ELSE 
+\STATE $q_i \leftarrow 0$
+\ENDIF
+\ENDFOR
+\RETURN $\displaystyle q=\sum_{i=0}^{n_A-n_B} q_i X^i$ si $n_A \geqslant n_B$, $q=0$ sinon  et r, normalisés
+\end{algorithmic}
+\caption{Algorithme de division euclidienne}
+\end{algorithm}
+\paragraph{Complexité algébrique\\}
+Supposons $n_A \geqslant n_B$.
+On a $O((n_A-n_B+1)(n_B+1)) $ opérations dans R $ = O($taille(A)$\times$taille(B))\\
+Si $deg(A) \leqslant 2n$ et $ deg(B) \leqslant 2n$ on a une complexité en $ O(n^2)$.
+\paragraph{Division euclidienne dans $\mathbb{Z}$\\}
+Soient $ A\in \mathbb{Z}, B \in \mathbb{Z}, B \neq 0$.
+Il existe $ q,r $ uniques tels que $A=Bq+r$ avec $0 \leqslant r < |B|$ ou $-\frac{|B|}{2} < r \leqslant \frac{|B|}{2}$
+\paragraph{Proposition\\}
+$O_{\beta}($taille(q)$\times$taille(B)) opérations sur les mots.
+\section{Algorithmes sous-quadratiques}
+\paragraph{Théorème\\}
+Soit $M_{\mathbb{Z}}(n)$ le nombre maximal d'opérations sur les mots pour multiplier 2 opérandes de taille $\leqslant n$ dans $\mathbb{Z}$ et $M_{R[X]}(n)$ le nombre maximal d'opérations sur les mots pour multiplier 2 opérandes de taille $\leqslant n$ dans $R[X]$.
+\begin{enumerate}
+\item Karatsuba 1962 
+$$ M_{\mathbb{Z}}(n) = O(n^{\log_2 3})$$
+\item Schonhage-Sta$\beta$en 1971 
+$$ M_{\mathbb{Z}}(n)= O(n\log n\log \log n)=\tilde{O}(n)$$
+Remarque : $\tilde{O}(f)=f(\log f)^{O(1)}$
+\item Frer 2005
+$$ M_{\mathbb{Z}}(n) = O(n \log n 2^{\log_* n})$$
+Remarque : $ \displaystyle \log _* (n) = \min_{k \geqslant 0} \{ k, 2 \mbox{ puiss } 2\mbox{ puiss } 2 \ldots \mbox{ puiss } 2 \mbox{ k fois }  > n\}$
+\item Cantor-Kaltofen 1991
+$$ M_{R[X]}(n) = O(n \log n \log \log n) =\tilde{O}(n)$$
+\end{enumerate}
+\paragraph{Théorème\\}
+Soit $D_{\mathbb{Z},R[X]}(n)$ la complexité de la division euclidienne sur 2 opérandes de taille $\leqslant n$. $$D_{\bullet}(n) = O(M_{\bullet}(n))$$
+\paragraph{Théorème\\}
+Soit $f : \mathbb{R}^+ \longrightarrow  \mathbb{R}^+$ telle que  $ b>1, a>0, c \in \mathbb{R}$. On a :
+$$ f(a) \leqslant a f\left(\frac{x}{b}\right)+cx $$avec $f(x)=1$ si $x<1$.\\
+Alors $$f(x) \ll \left\{ \begin{array}{ll}
+O(x^{\log_b(a)}) & \mbox{ si } a>b \\
+O(x\log x) & \mbox{ si } a=b\\
+O(x) & \mbox{ si } a<b \end{array}\right. $$
+On écrit $(a_1X+a_0)(b_1X+b_0) = a_1b_1 X^2 + (a_0b_1+a_1b_0) X + a_0b_0$.\\ Or $ (a_0b_1+a_1b_0) = (a_0+a_1)(b_0+b_1)-a_1b_1 - a_0b_0$.\\
+Avec $ A(x) = a_1(x)x^n + a_0(x) $ et $ B(x) = b_1(x)x^n+b_0(x)$ et $d a_i,b_i < n $, on a $A\times B$ qui se calcule en 3 multiplications et $O(1) $ additions de polynomes de degré $<n$.\\
+Si $M(s)$ est la complexité algébrique de la multiplication de 2 polynomes de degré $<s$, on peut supposer $s=2^k$, alors $$M(s) \leqslant 3M\left(\frac{s}{2}\right) + O(s) \Rightarrow M(s) = O(s^{\log_2 3})$$
+\paragraph{Remarque\\}
+Si s n'est pas une puissance de deux :
+\begin{enumerate}
+\item $\displaystyle M(s)\leqslant 3M\left(\left\lceil \frac{s}{2} \right\rceil \right) + O(s)$.
+\item On remplace s par $2^{\lceil \log_2 s \rceil } \geqslant s $ et on applique le lemme d'où :
+$$ M(s) = O(2^{\lceil \log_2 s \rceil log_2 3}) \ll 2^{(\log_2 s +1)\log_2 3} = 3\times s^{\log_2 3}$$
+\end{enumerate}
+\paragraph{Remarque\\}
+Soient $ \alpha(x)= a_1(x) + a_0$ et $\beta(x)=b_1(x)+b_0$, on cherche $ \gamma (x) = \alpha \beta = c_2 X^2 + c_1 X + c_0$. On fixe $x_1,x_2,x_3$ distincts dans un corps de base.\\
+On calcule $\gamma (x_i) = \alpha(x_i) \beta(x_i)$, $i=1,2,3$ + Lagrange pour retrouver $c_0,c_1,c_2$. Cette méthode se généralise avec r morceaux et on a une complexité de $ O(s^{1+\epsilon(r)}),\displaystyle \lim_{r \rightarrow \infty} \epsilon(r) = 0$.
+\subsection*{Cas particulier : FFT}
+\paragraph{Hypothse\\}
+On travaille sur un corps $K[X]$ qui contient $\omega$ une racine de l'unité d'ordre exact n.
+\paragraph{Définition : DFT\\}
+Soit $ T\in K[X]$, on définit
+$$ \mathcal{F} : K[X]/X^n-1 \longrightarrow  K^n $$
+$$T \longmapsto (T(\omega^0),T(\omega^1),\ldots,T(\omega^{n-1})) = \mathcal{F}(T,\omega)$$
+\paragraph{Lemme\\}
+$\mathcal{F}$ ralise un isomorphisme de K-algèbre $$ (K[X]/X^n-1), \times) \simeq (K^n,\mbox{ produit composante par composante})$$
+\paragraph{Corollaire\\}
+$$TU = \mathcal{F}^{-1}(\mathcal{F}(T) \otimes \mathcal{F}(U))$$
+Ceci permet de calculer $TU$ dans $K[X]/X^n-1$, $TU$ dans $ K[X]$ si $d(T) < \frac{n}{2}$ et $d(U) < \frac{n}{2}$.
+\paragraph{Lemme\\}
+Si $ T \in K[X]$, $\mathcal{F}(T,\omega)=(u_1,\ldots,u_{n-1})$, et $\displaystyle U(X) = \sum_{i=1}^{n-1} u_i X_i$. Alors $\mathcal{F}(U,\omega^{-1})=nT$.
+\begin{algorithm}[h!]
+\begin{algorithmic}
+\REQUIRE $n=2^k$, $T \in K[X]$, $dT<n$, $\omega$ d'ordre n dans K
+\ENSURE $\mathcal{F}(T,\omega)$
+\STATE Si $n=1$ retourner T.
+\STATE Ecrire $T(X) = T_0(X^2)+ X T_1(X^2)$
+\STATE Calculer $\mathcal{F}(T_0,\omega^2)=(a_0,\ldots,a_{\frac{n}{2}-1})$ et $ \mathcal{F}(T_1,\omega^2)=(b_0,\ldots,b_{\frac{n}{2}-1})$
+\RETURN $(a_i+\omega ^i b_i)_{i<n}$ où $ (a_i),(b_i)$ sont étendus par périodicité de période $ \frac{n}{2}$.
+\end{algorithmic}
+\caption{Algorithme FFT}
+\end{algorithm}
+\paragraph{Théorème\\}
+FFT s'effectue en $O(n \log n)$ opérations dans K.
+\paragraph{Remarque\\}
+\begin{enumerate}
+\item si $\omega \not \in K$, il faut le rajouter (Schonhage-Strassen)
+\item On peut définir un algorithme $FFT_k$ en coupant les entrées en k morceaux.
+\end{enumerate}
+\subsection*{Divisions sous -quadratiques}
+Soient $ a, b \in R[X]$, b unitaire, $da=n$, $db=m \leqslant n$.\\
+Si $ a = bq+r$ avec $dr \leqslant m-1$ et $dq\leqslant n-m$, alors 
+$$ X^n a\left( \frac{1}{X} \right) = X^m b\left( \frac{1}{X} \right)X^{n-m} q\left( \frac{1}{X} \right) + X^n r\left( \frac{1}{X} \right)$$
+$$ A = BQ + X^{n-m+1} (*)$$
+On calcule $Q \equiv A B^{-1} $ dans $ R[X]/X^{n-m+1} \rightarrow q \rightarrow r = a-bq $.
+\paragraph{Théorème\\}
+Soit $B,C_0,C_1,\ldots \in R[X]$ tels que $ B(0)=1$, $C_0=1$ et $\displaystyle C_{i+1} \equiv 2C_i -BC_i^2 \mod X^{2^{i+1}}$.\\
+Alors $\displaystyle BC_i \equiv 1 \mod X^{2^i} $
+\paragraph{Définition\\}
+Soit R un anneau commutatif. On définit $R[[X]]$ comme $R^{\mathbb{N}}$ muni de la structure d'anneau suivante : 
+$$ \sum a_i X^i + \sum b_i X^i = \sum (a_i+b_i) X^i $$
+$$ \sum a_i X^i  \times \sum b_i X^i = \sum c_k X^k \mbox{ avec } c_k=\sum_{i+j=k}a_ib_j$$
+$R[X]$ est un sous-anneau de $ R[[X]]$\\
+Si $\displaystyle a_0 \in R^* \Leftrightarrow \sum_{i\geqslant 0} a_i X^i \in  R[[X]]^*$.
+\begin{algorithm}[h!]
+\begin{algorithmic}[1]
+\REQUIRE $B \in R[X]$ tel que $B(0)=1$, $l\in \mathbb{N}$ (précision)
+\ENSURE$C \in R[X]$ tel que $BC \equiv 1 \mod X^l$
+\STATE $r\leftarrow \lceil\log_2 l\rceil$
+$ c_0 \leftarrow 1$
+\FOR{$i=1$ à $r$}
+\STATE $C_i \leftarrow (2C_{i-1} - BC_{i-1}^2) \mbox{ rem } X^{2^i} $
+\ENDFOR
+\RETURN $c=c_r (\mbox{rem } X^l)$
+\end{algorithmic}
+\caption{Algorithme inversion}
+\end{algorithm}
+\paragraph{Théorème\\}
+On suppose que $M_{R[X]} = M $ vérifie $M(2n) \geqslant 2M(n)$ et M croissante. Alors l'algorithme d'inversion utilise $O(M(2^r))= O(M(2l))$ opérations dans R.
+\begin{algorithm}[h!]
+\begin{algorithmic}[1]
+\REQUIRE $a,b \in R[X]$, b unitaire
+\ENSURE $q,r \in R[X]$ tels que $ a=bq+r $,  $ dr \leqslant db $
+\IF{ $ da < db $} 
+\RETURN $(0,a)$ \ENDIF
+\STATE $l \leftarrow da - db + 1 \geqslant 1$
+\STATE Calculer $C \in R[X]$ tel que $BC \equiv 1 \mod X^l$ où $B(X) = X^{dB} b\left(\frac{1}{X}\right)$
+\STATE Calculer $ Q \leftarrow AC \mod X^l$ où $A(X)  X^{dA} a\left(\frac{1}{X}\right)$
+\RETURN $q=X^{dAdB}Q\left(\frac{1}{X}\right)$ et $r=a-bq$.
+\end{algorithmic}
+\caption{Algorithme division euclidienne}
+\end{algorithm}
+\section{Structures fondamentales}
+\subsection{Fractions $ \mathbb{Q}, K[X]$}
+Soit R un anneau intègre, on définit Frac R$ = R \times (R\setminus\{0\})/\sim$ où $(a,b) \sim (c,d) \Leftrightarrow ad=bc$.
+\paragraph{Notation\\}
+$\frac{a}{b} = (a,b) $dans Frac R. On le munit d'une structure d'anneau :
+$$ \frac{a}{b} \times \frac{c}{d} =   \frac{ac}{bd} $$
+$$  \frac{a}{b} +  \frac{c}{d} =  \frac{ad+bc}{bd}$$
+\paragraph{Théorème :}
+Frac R est un corps.
+\paragraph{Normalisation\\}
+On peut imposer $pgcd(a,b)=1$.
+$$ (a,b) = \left( \frac{a}{pgcd(a,b)},  \frac{b}{pgcd(a,b)}\right) \mbox{ dans Frac R}$$
+\subsection{Quotients $ \mathbb{Z}/n \mathbb{Z}, K[X]/(T)$}
+Soit R un anneau, I un idéal de R, $ R/I$ l'anneau quotient où $a\sim b \Leftrightarrow a-b \in I$.
+\paragraph{Notation\\}
+$$a \equiv b \mod I$$
+\paragraph{Cas particulier\\}
+On se restreint au cas où R est euclidien ($\mathbb{Z},K[X]$).
+\begin{itemize}
+\item[$*$] Tout idéal I est principal, $I=(x)=x.R$. Notation : $a\equiv b \mod x$.
+\item[$*$] Toute classe $a + (x) \in R/(x)$ contient un élément canonique.
+\end{itemize}
+\paragraph{Définition\\}
+\begin{enumerate}
+\item $a+N\mathbb{Z} \in \mathbb{Z}/N \mathbb{Z}$ est sous forme normale si et seulement si $0  \leqslant a < |N|$.
+\item $ a + TK[X] \in K[X]/(T)$ est sous forme normale si et seulement si $da < d T$.
+\end{enumerate}
+\paragraph{Remarque\\}
+Pour mettre une représentation quelconque $a+xR$ sous forme normale il suffit de remplacer a par $rem (a,x)$.\\
+$a+(x) $ et $a'+(x)$ sous formes normales sont égales si et seulement si $a=a'$ dans R.
+\paragraph{Corollaire\\}
++, - dans $R/(x)$ s'effectuent avec complexité $ O(\mbox{taille}(x))$.\\
+$\times$  dans $R/(x)$ s'effectue avec complexité $ O(M_R(\mbox{taille}(x)))$.
+\section{Complétions $\mathbb{R}, K[[T]]$}
+$$K[[T]]=\mbox{Frac }(K[[T]])=\left\{\sum_{n\geqslant n_0}a_n T^n : a_n \in K, n_0 \in \mathbb{Z}\right\}$$
+\subsection{$\mathbb{R}$}
+\paragraph{Définition\\}
+Soit $l\in \mathbb{N}$ fixé (précision), $e_{min}$, $e_{max} \in \mathbb{Z} $ fixés. L'ensemble des nombres flottants en précision $l$ est :
+$$ \mathcal{F}= \mathcal{F}_{l,e_{min},e_{max},\beta}=\{0\} \cup \{\pm \beta ^e . m : e\in [e_{min},e_{max}],\beta^{l-1}\leqslant m \leqslant \beta^l\}$$
+On choisit une fonction d'arrondi $A:\mathbb{R} \rightarrow \mathcal{F} \cup \{\mbox{erreur}\}$
+$$A^-(x)=\left\{\begin{array}{ll}
+\max\{f\in \mathcal{F}, f \leqslant x\} & \mbox{par défaut} \\
+\mbox{erreur} & \mbox{ si l'ensemble est vide} \end{array}\right.$$
+$$A^+(x)=\left\{\begin{array}{ll}
+\min\{f\in \mathcal{F}, f \geqslant x\} & \mbox{par défaut} \\
+\mbox{erreur} & \mbox{ si l'ensemble est vide} \end{array}\right.$$
+\paragraph{Définition\\}
+Soient $x,y \in \mathcal{F}$
+$$ x \oplus y=A(x+y)$$
+$$  x \ominus y=A(x-y)$$
+$$ x \otimes y=A(x\times y)$$
+$$ x \oslash y=A(x/y)$$
+définit des opérations de $\mathcal{F} \times \mathcal{F} \rightarrow \mathcal{F} \cup \{$erreur$\}$
+\paragraph{Théorème\\}
+$ x + y$ ou $x - y$ se calcule en $O(l)$ opérations algébriques dans $\mathbb{Z}$.\\
+$x \times y $ ou $x / y $ se calcule en $O(M(l))$ opérations algébriques dans $\mathbb{Z}$.
+\subsection{$K[[T]]$}
+\paragraph{Définition\\}
+L'ensemble des "séries flottantes" est :
+$$ \mathcal{F}=\{0\} \cup \{T^e.m, e\in [e_{min},e_{max}], m \in K[T], d m \leqslant l-1\}$$
+et la fonction $K[[T]] \rightarrow \mathcal{F} \cup \{$erreur$\}$
+$$T^e \sum_{i\geqslant 0} m_i T^i \mapsto T^e \sum_{0 \leqslant i < l} m_i T^i$$ si $e\in [e_{min},e_{max}]$.
+\section{Nombres algébriques}
+\paragraph{Définition\\}
+Soit $ K\subset $ un corps (commutatif).\\
+$\alpha \in L$ est algébrique sur $K$ s'il existe $ P \in K[X], P\neq 0, P(\alpha)=0$.
+\paragraph{Proposition\\}
+Si $\alpha$ est algébrique alors il existe $P \in K[X]$, P unitaire, unique tel que 
+$$ P(\alpha) = 0$$
+$$ Q(\alpha)=0 \Rightarrow P | Q$$
+P est appelé polynome minimal de $\alpha$.
+\paragraph{Corollaire\\}
+$$K[\alpha] \simeq K[X] / (P_{min})$$
+$$ \alpha \mapsto X + (P_{min})$$
+$$A(\alpha) \leftarrow A(X)$$
+\paragraph{Cas particulier : $K=\mathbb{F}_p$\\}
+Si $P \in \mathbb{F}_p[X]$ est irréductible de degré n alors $\mathbb{F}_p[X]/(P) \simeq \mathbb{F}_p^n$.
+\paragraph{Théorème\\}
+$$\#\{P \mbox{ unitaire } \in \mathbb{F}_p[X], P \mbox{ irréductible de degré n }\} = \frac{1}{n} \sum_{d|n} \mu (d) q^{\frac{n}{d}}>0$$
+où $\mu (d) = \left\{ \begin{array}{ll}
+-1 & \mbox{ si } d=p_1\ldots p_k, p_i \mbox{ premiers différents}\\
+0 & sinon \end{array}\right.$
+\paragraph{Corollaire\\}
+\begin{itemize}
+\item Les éléments de $\mathbb{F}_q$ se codent avec $O(\log q)$ chiffres 
+\item $+,-$ ont pour complexité binaire $O(\log q)$
+\item $\times$ a pour complexité binaire $\tilde{O}(\log q)$.
+\end{itemize}
+\chapter{Quelques algorithmes arithmétiques fondamentaux}
+\section{Euclide}
+\begin{algorithm}[h!]
+\begin{algorithmic}[1]
+\REQUIRE $a,b \in \mathbb{Z}$ ou $K[X]$
+\ENSURE $pgcd(a,b)$
+\STATE $r_0 \leftarrow a;$
+\STATE $r_1 \leftarrow b;$
+\STATE $i \leftarrow 1;$
+\WHILE{$r_i \neq 0$}
+\STATE $ r_{i+1} \leftarrow rem(r_{i-1},r_i);$
+\STATE $i \leftarrow i+1$
+\ENDWHILE
+\RETURN $r_{i-1}$
+\end{algorithmic}
+\caption{Algorithme d'Euclide}
+\end{algorithm}
+\paragraph{Remarque\\}
+$$(a,b) \leftarrow (b,a \mod b)$$
+$$ \left(\begin{array}{l}
+a \\
+b \end{array}\right) 
+\leftarrow 
+\left(\begin{array}{cc}
+0 &1 \\
+1 & -q \end{array}\right) 
+\left(\begin{array}{l}
+a \\
+b \end{array}\right) $$
+\paragraph{Théorème\\}
+Euclide utilise $O(n^2)$ opérations élémentaires dans $\mathbb{Z}$ (ou $K[X]$) si $a,b$ sont de taille $\leqslant n$.
+\begin{algorithm}[h!]
+\begin{algorithmic}[1]
+\REQUIRE $a,b \in \mathbb{Z}$ ou $K[X]$
+\ENSURE $pgcd(a,b), u,v$ tels que $au+bv = pgcd(a,b)$
+\STATE $r_0 \leftarrow a;$
+\STATE $r_1 \leftarrow b;$
+\STATE $i \leftarrow 1;$
+\STATE $U_1 \leftarrow Id_1$
+\WHILE{$r_i \neq 0$}
+\STATE $ r_{i+1} \leftarrow rem(r_{i-1},r_i);$
+\STATE $U_{i+1} \leftarrow \left(\begin{array}{cc}
+0 &1 \\
+1 & -q_{i+1} \end{array}\right) U_i$
+\STATE $i \leftarrow i+1$
+\ENDWHILE
+\RETURN $r_{i-1}=pgcd(a,b)$ et la première ligne de $U_{i-1}$, $ua+vb=pgcd(a,b)$
+\end{algorithmic}
+\caption{Algorithme d'Euclide tendu}
+\end{algorithm}
+\paragraph{Théorème\\}
+Cet algorithme utilise $O(n^2)$ opérations élémentaires si taille(a) et taille(b) $\leqslant n$.
+\paragraph{Théorème\\}
+Il existe un algorithme calculant une relation de Bezout en $O(M(n) \log n) = \tilde{O}(n)$ opérations.
+\paragraph{Application 1\\}
+Soient $R = \mathbb{Z}$ ou $ K[X]$, $a,b \in R$ tels que $PGCD(a,b)=1$. Alors $\exists u,v \in R$ tels que $au+bv=1$,  et $\bar{u}=\bar{a}^{-1}$ dans $R/(b)$.
+\paragraph{Application 2\\}
+Soient $a,b \in R$, $PGCD(a,b)=1$ et $ au+bv=1$. Alors :
+$$R/(ab) \simeq R/(a) \times R/(b) $$
+$$ x \mapsto (x,x) $$
+$$ au\beta + bv\alpha \leftarrow (\alpha,\beta) $$
+\paragraph{Application 2'\\}
+Soient $a_1,\ldots,a_n \in R$, $PGCD(a_i,a_j) = 1$, $\forall i\neq j$. Alors :
+$$ R/\left(\prod_{i=1}^n a_i\right) \simeq \prod_{i=1}^n R/(a_i) $$
+$$ x \mapsto (x,\ldots,x) $$
+$$ \sum_{i=1}^n \alpha_i u_i A_i \leftarrow (\alpha_1,\ldots,\alpha_n)$$
+avec $A_i = \prod_{j\neq i} a_j$ et $ PGCD(a_i,A_i) =1 = u_i A_i + v_i a_i =1$.
+\paragraph{Remarque\\}
+Soient $R=K[X]$, $a_i = X-\alpha_i$, avec $\alpha_i \in K$, et $\alpha_i \neq \alpha_j$ pour $ i\neq j$. Alors :
+$$ K[X] / \prod_{i=1}^n (X-\alpha_i) \simeq \prod_{i=1}^n K[X] / (X-\alpha_i) \simeq K^n $$
+$$ P(X) \mapsto (P(X), \ldots, P(X)) \simeq (P(\alpha_1),\ldots, P(\alpha_n))$$
+\paragraph{Application 3 : Interpolation d'Hermite\\}
+Soient $\alpha_1,\ldots,\alpha_k$ deux à deux distincts dans K. On veut $P\in K[X]$ tel que $(*)$:
+$$ P(\alpha_1), P'(\alpha_1), \ldots P^{(l_1)}(\alpha_1) $$
+$$ P(\alpha_2), P'(\alpha_2), \ldots P^{(l_2)}(\alpha_2) $$
+$$ \vdots $$
+$$ P(\alpha_n), P'(\alpha_n), \ldots P^{(l_n)}(\alpha_n) $$
+prennent des valeurs fixées à l'avance.
+$$P(\alpha) = \beta^{(0)} $$
+$$P'(\alpha) = \beta^{(1)} $$
+$$ \vdots $$
+$$ P^{(l)}(\alpha)= \beta^{(l)} $$
+$$\Longleftrightarrow P(\alpha) = \beta^{(0)} + \beta^{(1)}(X-\alpha) + \ldots + \beta^{(l)} \frac{(X-\alpha)^l}{l!} + \dots + (X-\alpha)^k$$
+Or $ + \dots + (X-\alpha)^k $ est divisible par $(X-\alpha)^{l+1}$ donc $P(\alpha)$ est connu modulo $(X-\alpha)^{l+1}$.\\
+$$ (*) \Leftrightarrow P = Q_1 \mod (X-\alpha)^{l_1+1}$$
+$$ \vdots $$
+$$ \Longleftrightarrow P = Q_n \mod (X-\alpha)^{l_n+1}$$
+où les $Q_i$ sont connus.
+C'est donc un problème chinois dans $K[X]$.
+\paragraph{Application 4 : algorithme modulaire\\}
+Soit $ A=(a_{ij}) \in M_n(\mathbb{Z})$, quel est $ \det(A)$ ?\\
+Soit $ \varphi : \mathbb{Z} \longrightarrow R$ morphisme d'anneau. Alors $\varphi(\det(A))=\det(\varphi(A))$.
+\begin{enumerate}
+\item Soit $ \varphi : \mathbb{Z} \longrightarrow \mathbb{F}_p$ projection canonique. On connait alors $\det(A) \mod p$ après un pivot de Gauss sur $A \mod p$ dans $ M_n(\mathbb{F}_p)$
+\item On obtient donc $ \det(A) \mod (p_1,\ldots,p_k)$ si les $p_i$ sont des premiers différents.
+\item Si $|\det A| < B$ et $ N \geqslant 2B$, alors connaitre $\det(A) \mod N$ détermine $\det(A)$ dans $\mathbb{Z}$.
+$$ |\det(A)| \leqslant n!(\Vert A \Vert_{\infty})^n $$
+\end{enumerate}
+On veut $\displaystyle \sum_{i=1}^k \log p_i > \log(2B) = n \log(2 \Vert A \Vert_{\infty})+ \log n!$.
+\paragraph{Parenthèse sur les nombres premiers\\}
+\subparagraph{Théorème des nombres premiers\\}
+ $$ \theta (x)= \sum_{p\leqslant x, p\mbox{ premier}} ln(p) \underset{x \rightarrow \infty}{\sim} x $$
+ $$ \Pi(x) = \#\{p\leqslant x, p \mbox{ premier}\} \sim \frac{x}{ln(x)} $$
+  \subparagraph{Remarque\\}
+  Tout est effectif : $\theta(x) > 0,98 x$ pour $x >7481$.\\
+  
+  
+D'où $\{p_i\} = \{p \leqslant x, \mbox{ premier}\}$ et : 
+$$ \sum_{p\leqslant x} \log p = \theta(x) > 0,98 x $$
+si $0,98 x > \log(2B) \Rightarrow $ OK.
+\paragraph{Remarque\\}
+$$ \sum_{\frac{x}{2}\leqslant p < x} ln(p) = x-\frac{x}{2} \sim \frac{x}{2} $$
+d'où : 
+$$ \#\left\{\frac{x}{2} \leqslant p < x, p \mbox{ premier} \sim \frac{x}{2ln(x)}\right\}$$
+\section{Crible d'Eratosthène}
+\begin{algorithm}[h!]
+\begin{algorithmic}[1]
+\REQUIRE $B \in \mathbb{N}$
+\ENSURE $\{p \leqslant B, p \mbox{ premier}\}$
+\STATE Initialiser $T[2] = \ldots = T[B] = true$
+\FOR{$n=2$ à $\sqrt{B}$ (tel que $T[n] = true$)}
+\FOR{$k=2$ à $\lfloor \frac{B}{n}\rfloor$}
+\STATE $T[kn] \leftarrow false;$
+\ENDFOR
+\ENDFOR
+\RETURN $\{i\leqslant B,T[i]=true\}$
+\end{algorithmic}
+\caption{Crible d'Eratosthène}
+\end{algorithm}
+\paragraph{Améliorations\\}
+\begin{itemize}
+\item Si $ T[n]= false$ alors n n'est pas premier et ses multiples sont déjà barrés.
+\item Si $k<n$ alors $T[kn]$ est déjà barré.
+\item Et si on veut les nombres premiers entre $A$ et $A+B$ ?\\
+translation  faire : $T[i]$ associé  $A+i$.
+\item Si B est grand ?
+\begin{enumerate}
+\item $\{p\leqslant \sqrt{A+B}\}$
+\item Tableaux associés  $\left[A, A + \frac{B}{N}\right],\left[A + \frac{B}{N},A + \frac{2B}{N}\right]$
+\end{enumerate}
+\item On fixe $ N = 2\times 3 \times 5$, on utilise un crible pour chacune des $\varphi(N)$ classes ($\mod N$)  dans lesquelles se trouvent les nombres premiers.\\
+gain : $N$ en mémoire et $\frac{N}{\varphi(N)}$ en temps.
+\end{itemize}
+Le nombre d'accès mémoire de cet algorithme est alors :
+$$ B + \sum_{n \leqslant \sqrt{B}} \left\lfloor \frac{B}{N}\right\rfloor + B = 
+O(B) + O(\sqrt{B})+B \sum_{n\leqslant \sqrt{B}} \frac{1}{n}$$
+$$ = \left\{ \begin{array}{ll}
+O(B) + O(\sqrt{B})+ B ln(\sqrt{B}) & \mbox{ sans n premier} \\
+O(B) + O(\sqrt{B})+ B (ln(ln(\sqrt{B})) & \mbox{ avec n premier} \end{array}\right. \sim Bln(ln( B)) $$
+Le coût par nombre premier est $\sim ln(B)ln(ln(B))$.
+\section{Exponentiation binaire}
+Soit G un ensemble muni d'une loi associative $\times$. Soit $g\in G$, on veut calculer $g^n$ avec $n\geqslant 1$ un entier.
+\paragraph{Ides\\}
+$$\underset{\mbox{n-1 fois}}{g\times g \times g \times \ldots \times g}=g^n$$
+$$ \left(\left(\left(\left(g^2\right)^2\right)^2\right)^{\ldots}\right)^2 = g^{2^k}$$
+Donc pour $n=2^k$ une puissance de 2, on peut calculer $g^n$ en utilisant $\log_2 n$ opérations au lieu de $n-1$. \\
+Si $\displaystyle n=\sum_{i=0}^k \epsilon_i 2^i$, $\epsilon_i \in \{0,1\}$, $\epsilon_k=1$, on a :
+$$ g^n = \prod_{i=0}^{k} \left(g^{2^i}\right)^{\epsilon_i} $$
+$$ =  \prod_{i=0,\epsilon_i=1}^{k} g^{2^i} $$
+\begin{algorithm}[h!]
+\begin{algorithmic}[1]
+\REQUIRE $g$, $\displaystyle n=\sum_{i=0}^{k}\epsilon_i 2^i >0$, $\epsilon_i \in \{0,1\}$
+\ENSURE $g^n$
+\STATE $\gamma \leftarrow g; \Pi \leftarrow g^0$
+\FOR{$i=0$ à $k$}
+\IF{$\epsilon_i =1$}
+\STATE $ \Pi \leftarrow \Pi \times \gamma$
+\ENDIF
+\STATE $\gamma \leftarrow \gamma^2$
+\ENDFOR
+\RETURN $\Pi$
+\end{algorithmic}
+\caption{Exponentiation binaire}
+\end{algorithm}
+\paragraph{Théorème\\}
+Cet algorithme calcule $g^n$ en au plus $2(k+1)$ opérations ('$\times$'), soit $O(\log n)$.
+\paragraph{Améliorations\\}
+$g^{11}=g^8\times g^2 \times g$ \\
+$g^{11}=g\times \left(g^5\right)^2 = g \times \left( g \times \left(g^2\right) ^2 \right) ^2 $
+\paragraph{Nouvel algorithme pour calculer $g^n$\\}
+\begin{itemize}
+\item Si $ n=1$ renvoyer g
+\item Si n impair renvoyer $g\times \left( g^{\frac{n-1}{2}} \right)^2$
+\item Sinon renvoyer $\left( g^{\frac{n}{2}} \right)^2$
+\end{itemize}
+\paragraph{Prolongements\\}
+\begin{itemize}
+\item Si G est un groupe où l'inverse est "gratuit"\\
+$\displaystyle n = \sum \epsilon_i 2^i$, $\epsilon_i \in \{0,1,-1\}$ où le motif $\epsilon_i = \epsilon_{i+1} = 1$ n'apparait pas.
+\item Fenêtre flexible $g^n= g^{\alpha} \times \left(g^{\frac{n}{\beta}}\right)^{\beta} $ où $ \alpha = n \mod \beta$ et $ \beta $ est une petite puissance de 2. $\{g^{\alpha}, 0 \leqslant \alpha < \beta \}$ est précalculé.
+\end{itemize}
+\section{Symbole de Legendre / de Jacobi}
+\subsection{p premier impair}
+\paragraph{Définition\\}
+Soit $a \in \mathbb{Z}$.
+$$ \left(\frac{a}{p}\right)=\left\{ \begin{array}{ll}
+1 & \bar{a}\in \left(\mathbb{F}_p^*\right)^2\\
+0 & \bar{a} = 0 \\
+-1 & \bar{a}\not \in  \left(\mathbb{F}_p^*\right)^2 \end{array} \right.$$
+\paragraph{Lemme\\}
+$\left(\frac{a}{p}\right) = a^{\frac{p-1}{2}} \mod p $ et $ \left(\frac{ab}{p}\right)=\left(\frac{a}{p}\right)\times \left(\frac{b}{p}\right)$.
+\paragraph{Corollaire\\}
+$\left(\frac{a}{p}\right)$ se calcule en $O(\log p)$ multiplications dans $\mathbb{F}_p$ et si $0 \leqslant a < p $ en $\tilde{O}(\log_2 p)^2$ opérations élémentaires.
+\subsection{Symbole de Jacobi}
+
+$$ \left(\frac{a}{2}\right) = \left\{
+\begin{array}{ll}
+0 & \mbox{si a est pair} \\
+(-1)^{\frac{a^2-1}{8}} & \mbox{sinon} = \left\{\begin{array}{ll}
+1 & \mbox{si } a = \pm 1 \mod 8 \\
+-1 & \mbox{si } a = \pm 3 \mod 8 \end{array} \right.
+\end{array}\right.
+$$
+Soit $ \displaystyle b= \prod_{i=1}^{k}p_i \geqslant 1$, un produit de nombres premiers (pas distincts à priori). On définit : 
+$$  \left(\frac{a}{b}\right)=\prod_{i=1}^{k}  \left(\frac{a}{p_i}\right)  $$
+\paragraph{Proprits\\}
+Si $a,b \in \mathbb{Z}$ sont tels que tous les symboles de Jacobi utilisés sont bien définis, on a :
+\begin{enumerate}
+\item $ \displaystyle \left(\frac{ab}{c}\right) =  \left(\frac{a}{c}\right) \left(\frac{b}{c}\right) $ et $  \displaystyle  \left(\frac{a}{bc}\right) =  \left(\frac{a}{b}\right)  \left(\frac{a}{c}\right)$
+\item $ \displaystyle a \in \left((\mathbb{Z}/b\mathbb{Z})^*\right)^2 \Rightarrow  \left(\frac{a}{b}\right) =1 $
+\end{enumerate}
+\paragraph{Théorème\\}
+Si $a,b$ impairs $\geqslant 1$ :
+\begin{enumerate}
+\item $ \displaystyle  \left(\frac{-1}{b}\right) = (-1)^{\frac{b-1}{2}}$
+\item $ \displaystyle   \left(\frac{2}{b}\right)  =  \left(\frac{b}{2}\right) $
+\item $ \displaystyle   \left(\frac{a}{b}\right) =  \left(\frac{b}{a}\right) \times (-1)^{\frac{a-1}{2}\frac{b-1}{2}} = \left\{ 
+\begin{array}{ll}
+ \displaystyle  - \left(\frac{b}{a}\right) & \mbox{si } a=b=3 \mod 4 \\
+ \displaystyle   \left(\frac{b}{a}\right) &\mbox{sinon} 
+  \end{array}\right.
+  $
+\item $ \displaystyle \mathbb{Z} \rightarrow \{0,1,-1\} $\\
+$ \displaystyle  a \mapsto  \left(\frac{a}{b}\right) $ est périodique de période b.
+
+\end{enumerate} 
+\begin{algorithm}[h!]
+\begin{algorithmic}[1]
+\REQUIRE $b \geqslant 1$ impair, $a \in \mathbb{Z}$
+\ENSURE $ \displaystyle \left(\frac{a}{b}\right)$ symbole de Jacobi
+\STATE $s \leftarrow 1$
+\WHILE{$b\neq0$}
+\STATE $\displaystyle s \leftarrow s \times \left(\frac{2}{b}\right)^{v_2(a)}$; 
+\STATE $\displaystyle a \leftarrow \frac{a}{2^{v_2(a)}}$; 
+\STATE $\displaystyle s \leftarrow (-1)^{\frac{a-1}{2}\frac{b-1}{2}} \times s$;
+\STATE $\displaystyle (a,b) \leftarrow (b\mod a,a)$;
+\ENDWHILE
+\IF{$a=1$}
+\RETURN s;
+\ELSE \RETURN 0;
+\ENDIF
+\end{algorithmic}
+\caption{Calcul du symbole de Jacobi}
+\end{algorithm}
+
+\paragraph{Remarque\\}
+Coût de $(-1)^x$ : $O(1)$.
+\paragraph{Théorème\\}
+On suppose que les entiers sont écrits dans une base qui est une puissance de 2. Alors cet algorithme utilise $O(\log(\max(|a|,|b|))^2)$ pour calculer $ \displaystyle \left(\frac{a}{b}\right)$.
+\paragraph{Application\\}
+Soit $N=pq$, p et q deux premiers distincts.\\
+Je veux prouver que je connais p et q sans divulguer p ou q.
+\begin{itemize}
+\item $ \displaystyle \left(\frac{a}{N}\right)$ calculable.
+\item $  \displaystyle \left(\frac{a^2}{N}\right) = 1$ si $ PGCD(a,n)=1$.
+\item a est un carré dans $(\mathbb{Z}/n\mathbb{Z})^*$ si et seulement si $ \displaystyle \left(\frac{a}{p}\right) =  \displaystyle \left(\frac{a}{q}\right)=1$
+\item On suppose connu $ g \in \mathbb{Z}/n\mathbb{Z}$ qui vérifie $ \displaystyle \left(\frac{g}{p}\right)= \displaystyle \left(\frac{g}{q}\right)=-1$
+\end{itemize}
+\subparagraph{Défi :} On transmet $h=g^{\epsilon}u^2$ où $\epsilon \in \{0,1\}$ est tiré uniformément au hasard, et $u \in \mathbb{Z}/n\mathbb{Z}$. Est-ce un carré ?
+\subparagraph{Réponse :} $ \epsilon = 0 $ ou $ \epsilon = 1$\\
+$\epsilon = 0 $ si et seulement si $  \displaystyle \left(\frac{h}{p}\right)=1$\\
+$ \epsilon = 1 $ si et seulement si $  \displaystyle \left(\frac{h}{p}\right)=-1$
+\section{Test de non-primalité sur $\mathbb{Z}$}
+\paragraph{Théorème\\}
+Soit N entier impair.
+Si N est premier et $ 0 < a< N$, alors :
+\begin{enumerate}
+\item $a^{N-1} = 1 \mod N$
+\item $a^{\frac{N-1}{2}} =  \displaystyle \left(\frac{a}{N}\right)\neq 0 \mod N $
+\item Soit $N-1 = 2^eq$, q impair, alors :
+$$ \left\{\begin{array}{l}
+a^q = 1 \mod n \\
+\exists 0\leqslant i < e, a^{q^{2^i}} = -1 \end{array}\right. $$
+\end{enumerate}
+\paragraph{Algorithme\\}
+On tire $a \in ]0,N[$ uniformément au hasard. Il y a trois variantes :
+\begin{itemize}
+\item[(a)] Si 1) est faux OU 
+\item[(b)] Si 2) est faux OU
+\item[(c)] Si (3) est faux
+\end{itemize}
+alors succès : N est composé.\\
+Sinon échec.
+(a) Fermat, (b) Soloway-Strassen, (c) Rabin-Miller\\
+\paragraph{Remarque\\}
+Si N est premier : ECHEC inéluctable.
+\paragraph{Complexité\\}
+La condition 3) se vérifie en calculant $b=a^q \mod n$ puis par au plus e-1 mises au carré. \\
+$O(\log N)$ opérations dans $\mathbb{Z}/n\mathbb{Z}$\\
+$O(\log N)^2$ jacobi pour 2)
+\paragraph{Théorème\\}
+Si un entier N impair vérifie 3) alors il vérifie 2) et inversement pour $0 < a < N$.
+On peut construire des paires $(N,a)$ telles que :\\
+1) soit vérifié et pas 2)\\
+1) soit vérifié et pas 3)\\
+\paragraph{Théorème\\}
+Soit N impair composé. $ \{a \in \mathbb{Z}/n\mathbb{Z} \mbox{ tel que } a^{\frac{N-1}{2}} =  \displaystyle \left(\frac{a}{N}\right) \neq 0 \mod N \}$ est un sous groupe strict de $(\mathbb{Z}/n\mathbb{Z})^*$.
+\paragraph{Théorème de Korselt\\}
+Soit N composé. \\
+$\{ a \in \mathbb{Z}/n\mathbb{Z} \mbox{ tel que } a^{N-1} = 1 \mod N\}$ est un sous-groupe de $(\mathbb{Z}/n\mathbb{Z})^*$.\\
+Il est gal  $(\mathbb{Z}/n\mathbb{Z})^*$ si et seulement si :
+\begin{itemize}
+\item N est sans facteur carré 
+\item pour tout premier $p|N$, on a $p-1|N-1$ $(*)$
+\end{itemize}
+\paragraph{Définition\\}
+Un entier N composé tel que les deux candidats $(*)$ sont vérifiés est dit de Carmichael.
+\paragraph{Remarque\\}
+Il existe une infinité de tels nombres.
+\paragraph{Corollaire\\}
+Soit N impair composé.\\
+La probabilité qu'un a tel que $0<a<N$ vérifie 2) est inférieure ou égale  $\frac{1}{2}$. \\
+La probabilité qu'un a tel que $0<a<N$ vérifie 3) est inférieure ou égale  $\frac{1}{2}$.
+\paragraph{Remarque\\}
+En fait, on démontre que la probabilité qu'un a tel que $0<a<N$ vérifie 3) est inférieure ou égale  $\frac{1}{4}$.
+\section{Test de primalité sur $\mathbb{Z}$}
+\paragraph{Théorème\\}
+N est premier $\Leftrightarrow (\mathbb{Z}/n\mathbb{Z})^* $ a N-1 éléments $\Leftrightarrow $ il existe $g \in (\mathbb{Z}/n\mathbb{Z})^*$ d'ordre N-1.\\
+Soit G un groupe et $\prod p^{e_p} = |G|$ la factorisation de son cardinal alors $g\in G$ est d'ordre n $ \Leftrightarrow \left\{\begin{array}{ll}
+g^n=1 & \mbox{le neutre} \\
+g^{\frac{n}{p}} \neq 1 & \forall p \mbox{ premier, p divisant n} \end{array}\right. $.
+\paragraph{Corollaire\\}
+On peut prouver que $g \in $ est bien d'ordre en utilisant $O(\log n)^2 $ multiplications dans le groupe.
+Calculer $\{ g^i, i<n\}$ réclame n multiplications.
+\begin{algorithm}[h!]
+\begin{algorithmic}[1]
+\REQUIRE $N$ tel que tous les diviseurs premiers de N-1 soient connus.
+\ENSURE preuve de primalité de N ou échec. 
+\STATE Tirer $1<a<N$ uniformément au hasard.
+\IF{ a est d'ordre $N-1$ dans $ (\mathbb{Z}/n\mathbb{Z})^*$} 
+\RETURN succès
+\ELSE \RETURN échec 
+\ENDIF
+\end{algorithmic}
+\caption{Preuve de primalité}
+\end{algorithm}
+\paragraph{Analyse\\}
+SI N est premier alors $(\mathbb{Z}/n\mathbb{Z})^*$ est cyclique et a N-1 éléments. Il a donc $\varphi(N-1)$ générateurs. La probabilité de succès est donc $\geqslant \frac{\varphi(n)}{n}$ où $n=N-1$ \\
+$$ = \prod_{\underset{p|n}{p \mbox{ }premier}} \left(1-\frac{1}{p}\right) \gg \frac{1}{\log \log n} $$
+
+\section{Factorisation dans $\mathbb{Z}$}
+\paragraph{Définitions\\}
+Soit $R$ un anneau. 
+\begin{itemize}
+\item $R^*=\{\mbox{units de R}\}=\{x \in R,\ \exists y \in R,\ xy=1\} $
+\item $x \in R$ est irréductible si :
+\begin{itemize}
+\item $x\not \in R^* $
+\item $x=yz \Rightarrow y \in R^* $ ou $z \in R^* $
+\end{itemize}
+\item $x \in R$ est un diviseur de zéro si $x\neq 0$ et $\exists y \in R,\ y \neq 0,\ xy=0$
+\end{itemize}
+\paragraph{Définition\\}
+$R$ est factoriel si tout élément $x \in R\backslash \{0\}$ s'écrit 
+$$x= \epsilon \prod_{i=1}^n p_i $$
+où $\epsilon \in R^*$, $p$ irréductible.\\
+Convention : un quotient vide pour $n=0$ vaut 1. Et si $x=\epsilon ' \prod\limits_{i=1}^n p_i '$ est une autre décomposition alors $n=n'$ et il existe $\sigma \in S_n$ tel que $ p_i$ et $p'_{\sigma(i)}$ sont associés pour tout $i$. (A et B sont associés si et seulement si $\exists u \in R^*,\ a=ub $). \\
+\paragraph{Stratégie générale de factorisation si $R$ est euclidien\\}
+Soit $x \in R$, si $\bar{a} \in R/(x)$ est un diviseur de zéro alors $PGCD(a,x)$ est un diviseur de $x$, ce n'est pas une unité et il n'est pas associé à $x$. $\Rightarrow x = d \frac{x}{d}$ où $d=PGCD(a,x)$ est une factorisation non triviale.\\
+
+Soit $N \in \mathbb{Z}$ que l'on veut factoriser. On cherche $\bar{a} \in \mathbb{Z}/n\mathbb{Z}$ un diviseur de zéro.\\
+La variante la plus courante : on cherche $u, v \in \mathbb{Z}$ tels que $u^2 = v^2 \mod N (*) \Rightarrow u = \pm v \mod N \Rightarrow a = u \pm v $ convient.\\
+Supposons $(*)$ avec $u,v$ premiers à $N>2 \Rightarrow \left(\frac{u}{v}\right)^2 = 1 \mod N$.\\
+L'équation $x^2 = 1$ dans $(\mathbb{Z}/n\mathbb{Z})^*$ a exactement deux solutions \\
+$\Longleftrightarrow  (\mathbb{Z}/n\mathbb{Z})^*$ est cyclique.\\
+$ \Longleftrightarrow N=4 $ ou $N = p^k $ ou $ N= 2p^k$ avec $k \geqslant 1$, $p$ premier impair.
+\paragraph{Remarque\\}
+Comment tester $N=q^k $ ? (et calculer $q,k$ ?)
+$$ k \leqslant \log_q N \leqslant \log_2 N $$
+Il suffit de savoir tester si $N = q^k $ pour un $k$ fixé et extraire une racine $k$-ème.\\
+On a deux méthodes d'analyse numérique pour produire $q_n$ (calculable !) tel que $q_n \longrightarrow N^{\frac{1}{k}}$ dans R.\\
+Dès que $|q_n -  N^{\frac{1}{k}}| < \frac{1}{2}$ il n'y a qu'une possibilité pour $q$ : 
+$$ q = \left\lfloor q_n + \frac{1}{k} \right\rfloor = \lfloor q_n \rceil$$
+et il suffit de tester si $N = q^k$. Tout ceci se fait en temps $(\log N)^{O(1)}$.
+\begin{algorithm}[h!]
+\begin{algorithmic}[1]
+\REQUIRE $N$ impair, pas une puissance pure, $B$ une borne de "friabilité"
+\ENSURE un facteur non trivial de N ou échec. 
+\STATE Soit $\mathcal{B} \leftarrow \{p \leqslant B, p \mbox{ premier}\}$
+\STATE On "produit" des $x_j \in \mathbb{Z}$ avec $j \in J$ tel que $x_j^2 = \prod\limits_{i \in \mathcal{B}} i^{e_{i,j}} \mod N$ avec $e_{i,j} \in \mathbb{Z} $.
+\STATE Soit $(\bar{v_0})$ un élément du noyau de $(\bar{e_{i,j}}) \in M_{|B|\times J} (\mathbb{F}_2) $\\
+$\Leftrightarrow \sum\limits_j e_{i,j} v_j = 0 \mod 2$, $\forall i$.
+\STATE Alors $\left(\prod\limits_{j \in J} x_j^{v_j} \right)^2 = \sum\limits_{i \in \mathcal{B}} i^{\sum\limits_j e_{i,j}v_j} \mod N$\\
+on pose $\bar{u} = \prod\limits_{j\in J} x_j ^{v_j} \mod N$, $\bar{v} = \prod i^{\frac{\sum\limits_j e_{i,j}v_j}{2}} \mod N$ et on a :
+$$ u^2 = v^2 \mod N $$
+\IF{$u = \pm v$} 
+\RETURN échec
+\ELSE \RETURN $PGCD(u-v,N)$
+\ENDIF
+\end{algorithmic}
+\caption{Algorithme de Dixon}
+\end{algorithm}
+
+\paragraph{Détails sur l'étape 2)}
+\begin{itemize}
+\item Tirer $x \in \mathbb{Z}/n\mathbb{Z}$ uniformément au hasard et calculer $rem(x^2,N)$. S'il se factorise sur $\mathcal{B}$ (division exhaustive) on a une relation sinon on recommence.
+\item Optimiser $B$ tel que la recherche exhaustive + l'algèbre linéaire ne soient pas trop couteux mais tel qu'on ait beaucoup d'entiers de $[0,N]$ $B$-friables $\Rightarrow B \approx e^{c(\log N \log \log N)^{\frac{1}{2}}} $
+\item Choisir $J$ de façon à avoir plus d'inconnues que d'équations pour 3). Il faut juste que $|\mathcal{B}| < J$.
+\end{itemize}
+\section{Factorisation dans $\mathbb{F}_q(\alpha)$}
+\paragraph{Remarque préliminaire\\}
+Soit $T \in k[X]$ avec $k$ un corps, $T$ unitaire, un polynome à factoriser. On peut supposer que $T$ est sans facteur carré (si $k$ est parfait) $\Rightarrow \mbox{car }k=0$ ou $\mbox{car }k=p$ et $x \rightarrow x^p$ surjectif.
+\paragraph{Théorème\\}
+Soit $\Delta = PGCD(T,T')$
+\begin{enumerate}
+\item $\Delta = 1 \Leftrightarrow T $ est sans facteur carré.
+\item $ \Delta = T \Leftrightarrow T'=0 \Leftrightarrow T=t(X^p)$ où $t\in k[X]$ et $p=\mbox{car }k \Leftrightarrow $(si k est parfait) $ T = \tau(X)^p$ où $\tau \in k[X]$.
+$$ \sum t_iX^{pi} = \left(\sum \tau_i X^i\right)^p \mbox{ vrai ssi } t_i =\tau_i^p, \ \forall i $$
+\item $\Delta$ est un facteur strict de $T$. On peut étudier séparément $\Delta $ et $\frac{T}{\Delta}$ et $\frac{T}{\Delta}$ est sans facteur carré.
+\end{enumerate}
+\paragraph{Algorithme de Berlekamp\\}
+Soit $T \in \mathbb{F}_q[X]$, unitaire sans facteur carré. On a $T = \prod\limits_{i=1}^{s} T_i $ avec $T_i$ irréductibles unitaires.
+$$ A = \mathbb{F}_q[X]/(T) \simeq \prod_{i=1}^s \mathbb{F}_q[X] /(T_i) \simeq \prod_{i=1}^s \mathbb{F}_q \times \mbox{deg }T_i $$
+$$ B = \mbox{Ker }\left(\begin{array}{ccc}
+A & \longrightarrow & A \\
+x & \mapsto & x^q-x \end{array}\right) $$
+\paragraph{Corollaire\\}
+$T$ irréductible $ \Leftrightarrow \dim \mathbb{F}_q \times B = 1 $\\
+$\dim B = \#$ facteurs carrés irréductibles distincts de $T$.\\
+Soit $\phi : \begin{array}{ccc}
+A & \longrightarrow & A \\
+x & \mapsto & x^q \end{array} $. On veut calculer $\mbox{ker }(\phi - Id)$. On écrit la matrice de $\phi$ dans la base $(\bar{1},\bar{X},\bar{X^2}, \ldots, \bar{X^{(deg T) -1}})$.\\
+$\phi(\bar{X_i}) = \bar{X^{qi}} = (\bar{X^i})^q$ par exponentiation binaire.\\
+Mieux : $\phi(\bar{1}) = 1$, $ \phi(\bar{X}) =  \bar{X}^q $ par exponentiation binaire, $\phi(X^{i+1}) = \phi(X^i)\phi(X) $ : par tout a on peut écrire la matrice de $\phi - Id$.
+\paragraph{Corollaire\\}
+On a un algorithme déterministe polynomiale en $\log q$ et $T$.\\
+
+On cherche un diviseur de zéro dans $B$ donc dans $A$. Soit $\bar{x} \in B,\, x \not \in \mathbb{F}_q$. Il existe $\alpha \in \mathbb{F}_q $ tel que $x-\alpha$ soit diviseur de zéro.\\
+Algorithme : Pour tout $\alpha \in \mathbb{F}_q$, tester si $PGCD(x-\alpha,T)$ est non-trivial.\\
+Maintenant $q$ est impair.\\
+Idée : $\bar{x} \in B$, $\bar{y} = \bar{x}^{\frac{q-1}{2}}$. Les composantes de y dans $\prod\limits_{i=1}^s \mathbb{F}_q$ sont dans $\{-1,0,1\}$. $PGCD(y-1,T)$ ?\\
+Mauvais cas : 
+\begin{itemize}
+\item $-\left(\frac{q-1}{2}\right)^s$ [tous les $y_i =1 $]
+\item $-\left(\frac{q+1}{2}\right)^s$ [tous les $y_i \neq 1$]
+\end{itemize}
+\chapter{Systèmes polynomiaux\\}
+\paragraph{Motivation\\}
+Soit $k$ un corps et $f_i \in k[X_1,\ldots,X_n]$
+$$ (S) \left\{\begin{array}{c}
+f_1(x_1,\ldots,x_n) = 0 \\
+\vdots \\
+f_m(x_1,\ldots,x_n) = 0 \end{array}\right. $$
+$x_i \in k $ ?\\
+$$<f_1,\ldots,f_m> \subseteq k[X_1,\ldots,X_n]$$
+$$ I \subseteq k[X_1,\ldots,X_n]$$
+$$f \in I \mbox{ ?} $$
+\section{Ordres monomiaux sur $k[x_1,\ldots,x_n]$, k corps}
+\paragraph{Notation :} $\alpha = (\alpha_1,\ldots,\alpha_n) \in \mathbb{N}^n $\\
+$ X^{\alpha} = X_1^{\alpha_1}\ldots X_n^{\alpha_n}$ est un monome.
+\paragraph{Remarques}
+\begin{enumerate}
+\item Les monomes sont en bijection avec $ \mathbb{N}^n$
+\item Tout ordre sur $ \mathbb{N}^n$, $ \alpha < \beta $ définit un ordre sur les monomes $X^{\alpha} < X^{\beta} $
+\end{enumerate}
+\paragraph{Exemple : ordre lexicographique (strict) noté lex}
+$$ (\alpha_i) < (\beta_i) \Longleftrightarrow (\alpha_j < \beta_j \mbox{ si j est la première coordonnée où } (\alpha_i) \mbox{ et } (\beta_i) \mbox{ diffèrent.} $$
+\paragraph{Définition\\}
+Un ordre est monomial si :
+\begin{itemize}
+\item ordre total ($\alpha < \beta$ ou $ \alpha > \beta$ ou $\alpha = \beta$)
+\item $\alpha > \beta$ et $\gamma \in \mathbb{N}^n \Rightarrow \alpha + \gamma > \beta + \gamma $
+\item $ \alpha \in \mathbb{N}^n \Rightarrow \alpha \geqslant 0 = (0, \ldots, 0)$
+\end{itemize}
+\paragraph{Théorème\\}
+lex est monomial. \\
+
+On fixe un ordre pour la suite.
+\paragraph{Définitions\\}
+Soit $f = \sum\limits_{\alpha \in \mathbb{N}^n} a_{\alpha} X^{\alpha} \neq 0 $ dans $k[x_1,\ldots,x_n]$ avec $a_{\alpha} \in k$ et $a_{\alpha} = 0$ pour presque tout $\alpha$.
+\begin{enumerate}
+\item $ \deg f = \max\{\alpha \in \mathbb{N}^n,\, a_{\alpha} \neq 0\} $ [multidegré de $\mathbb{N}^n$]
+\item $ cd(f) = a_{\deg f} \in k $
+\item monome dominant : $X^{\deg f}$ noté $md(f)$
+\item terme dominant : $a_{\deg f} X^{\deg f}$ noté $td(f)$
+\end{enumerate}
+\paragraph{Lemme\\}
+Soient $f,g \neq 0$ (dans $k[x_1,\ldots,x_n]$). On a :\\
+$ \deg (fg) = \deg f + \deg g $ (somme composante par composante)\\
+$ \deg (f+g) \leqslant \max (\deg f, \deg g)$ si $f+g \neq 0$
+\section{Pseudo division euclidienne}
+\paragraph{Théorème\\}
+Soit $(f_1,\ldots,f_s) \in k[x_1,\ldots,x_n]$\\
+Tout $f\in k[x_1,\ldots,x_n]$ s'écrit :
+$$ f = \sum_{i=1}^s q_if_i + r $$
+où $r,q_i \in k[x_1,\ldots,x_n]$, avec $r=0$ ou $r=\sum r_{\alpha}X^{\alpha}$ tel qu'aucun des monomes $X^{\alpha}\  (r_{\alpha}\neq 0)$ ne soit divisible par l'un des $md(f_i)$.
+\paragraph{Définition\\}
+$r$ est un reste de la division de $f$ par $(f_1,\ldots,f_s)$
+\begin{algorithm}[h!]
+\begin{algorithmic}[1]
+\REQUIRE $f$, $f_i$
+\ENSURE $q_i$, $r$
+\STATE $q_1 \leftarrow 0$;\\
+$ \vdots $\\
+$ q_s \leftarrow 0$;\\
+$r\leftarrow 0$;\\
+$ p \leftarrow f$;\\
+\WHILE{$p\neq 0$}
+\STATE $i\leftarrow 1$; $div \leftarrow faux$;
+\WHILE{$i\leqslant s$ et $div = faux$}
+\IF{$md(f_i) | md(p)$}
+\STATE $q_i \leftarrow q_i + \frac{td(p)}{td(f_i)}$;
+\STATE $p \leftarrow p - \frac{td(p)}{td(f_i)} f_i $;
+\STATE $div \leftarrow vrai $;
+\ELSE
+\STATE $i \leftarrow i+1$;
+\ENDIF
+\ENDWHILE
+\IF{$div = faux $}
+\STATE $r \leftarrow r+td(p)$;
+\STATE $p \leftarrow p-td(p)$;
+\ENDIF
+\ENDWHILE
+\RETURN $q_i$, $r$
+\end{algorithmic}
+\caption{Algorithme division euclidienne}
+\end{algorithm}
+\section{Résultats, Applications}
+\paragraph{Notation\\}
+Soit $(g_{\lambda})_{\lambda \in E}$ est un ensemble de polynomes de $k[x_1,\ldots,x_n]$. On note $<g_{\lambda}>$ le plus petit idéal de $k[x_1,\ldots,x_n]$ contenant tous les $g_{\lambda}$.
+\paragraph{Définition\\}
+Soit $I$ un idéal de $k[x_1,\ldots,x_n]$. Un système $(g_1,\ldots,g_s)$ de générateurs de $I$ est une base de Grobner si et seulement si pour tout $f \in k[x_1,\ldots,x_n]$ le reste de la division euclidienne de $f$ par $(g_1,\ldots,g_s)$ est bien défini. Il existe un unique $r$ tel que $f= \sum\limits_{i=1}^s q_ig_i + r$.
+\paragraph{Théorème\\}
+A partir d'un système fini de générateurs de $I$, il existe un algorithme qui calcule une base de Grobner de $I$.\\
+
+Il y a une notion de base canonique, tout idéal $I$ admet une unique base de Grobner "réduite".
+\paragraph{Corollaire\\}
+Si $f \in k[x_1,\ldots,x_n]$, on a $f \in I \Leftrightarrow r=0$ (reste de la division par base de Grobner)
+\paragraph{Corollaire\\}
+On peut tester si $I=J$ ($\Leftrightarrow$ les bases de Grobner réduites sont égales).
+\paragraph{Définition équivalente\\}
+$g_1,\ldots,g_s$ est une base de Grobner de I $\Leftrightarrow $
+$$<md(g_i)>_{i=1,\ldots,s} = <md(g),g\in I>$$
+\section{Résoudre les systèmes d'équations polynomiales}
+\paragraph{Définition\\}
+Soit $I = < f_1,\ldots,f_s> \in k[x_1,\ldots,x_n]$\\
+Le $l$-ème idéal d'élimination $I_l$ est l'idéal de $k[x_{l+1},\ldots,x_n]$ :
+$$ I_l = I \cap k[X_{l+1},\ldots,X_n] $$
+\paragraph{Théorème\\}
+Soit $G$ une base de Grobner de $I$ pour lex. Alors $G_l = G \cap  k[X_{l+1},\ldots,X_n]$ est une base de Grobner de $I_l$.
+\paragraph{Corollaire\\}
+Si $f_1(x_1,\ldots,x_n) = \ldots = f_s(x_1,\ldots,x_n) = 0$ alors on a :
+$$ g_n(x_n) = 0 $$
+$$ g_{n-1}(x_n,x_{n-1})=0 $$
+$$ g_{n-2}(x_n,x_{n-1},x_{n-2})=0$$
+$$ \vdots $$
+"forme triangulaire"\\
+pour des $g_i$ calculables.
+\paragraph{Corollaire\\}
+Si :
+$$ (E) \left\{ \begin{array}{c}
+x_1 = f_1(t_1,\ldots,t_m)\\
+\vdots \\
+x_n = f_n(t_1,\ldots,t_m) \end{array}\right. $$
+est un système d'équations paramétriques, on fixe $t_1 > t_2 > \ldots > t_m > x_1 > \ldots > x_n $. Alors $I_m$ définit le plus petit ensemble (défini par des équations polynomiales) contenant $(E)$.
+\paragraph{Théorème\\}
+$I = <f_1,\ldots,f_s> \subset \mathbb{C}[X_1,\ldots,X_n]$
+\begin{enumerate}
+\item Le système $ (S) \left\{\begin{array}{c}
+f_1(x_1,\ldots,x_n) = 0 \\
+\vdots \\
+f_s(x_1,\ldots,x_n) = 0 \end{array}\right.$ a une solution $(x_1,\ldots,x_n) \in \mathbb{C}^n$ si et seulement si la base de Grobner réduite de $I$ est $\neq \{1\}$.
+\item $(S)$ a un nombre fini de solutions si et seulement si $\forall i \leqslant n$ une puissance de $x_i$ est dans $< md(f),f\in I>$.
+\end{enumerate}
+\end{document}

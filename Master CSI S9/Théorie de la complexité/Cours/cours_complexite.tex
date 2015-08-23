@@ -1,0 +1,454 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[francais]{babel}
+\usepackage[pdftex]{graphicx}
+\usepackage [utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{subfigure}
+
+\floatname{algorithm}{Algorithme}
+
+\let\mylistof\listof
+\renewcommand\listof[2]{\mylistof{algorithm}{Liste des algorithmes}}
+
+\makeatletter
+\providecommand*{\toclevel@algorithm}{0}
+\makeatother
+
+
+\title{Théorie de la complexité}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage 
+
+\chapter{Introduction}
+\section{Approche semi-formelle}
+\begin{itemize}
+\item Factorisation des entiers :
+\begin{itemize}
+\item instances du problème (données)
+\item question 
+\end{itemize}
+$n \longrightarrow  \bigcirc \longrightarrow p_1, k_1, \ldots, p_m, k_m $ (o $p_1^{k_1}\ldots p_m^{k_m} = n$)
+\item Calcul dans des graphes
+\begin{figure}[h]
+	\centering
+  \scalebox{0.5}{\input{graphe1.pdf_t}}
+\end{figure}
+$$ G = (S,A) $$
+$S$ fini, $|S|=n$, $A \subset \{$ paires de sommets $\}$ \\
+
+Questions :
+\begin{enumerate}
+\item Existe-t-il un "triangle" ?
+\item Quel est le plus court chemin de a vers b ?
+\item Existe-t-il un circuit hamiltonien ? (tous les sommets une seule fois)
+\end{enumerate}
+\item Calculer un PGCD
+\item Calculer un exposant RSA
+\end{itemize}
+L'existence d'un algorithme efficace qui donne la réponse revient à dire que le problème est "facile".\\
+\paragraph{"Définition" : \\}
+Un problème de décision est un problème dont la réponse est oui ou non.\\
+But: Faire la différence entre :
+\begin{itemize}
+\item Problèmes "faciles" : algorithme rapide
+\item Problèmes "difficiles" : pas d'algorithme rapide
+\end{itemize}
+
+entrée de taille n $\longrightarrow \bigcirc \longrightarrow $ sortie après un temps $ \leqslant f(n) $ \\
+Un problème facile a un temps $\leqslant n^k$ avec $ k$ fixé (temps polynomial) et un problème difficile n'a pas de k qui vérifie cette condition.\\
+
+\paragraph{Quelle est la taille de l'entrée ?\\}
+Elle est exprimée en nombre de bits (symboles). \\
+Un graphe peut être représenté par sa matrice d'adjacence de taille $n^2$ mais si le graphe a peu d'arêtes on peut le représenter par des listes de voisins qui ont une taille de $n^2 \log n$ mais s'il y a peu d'arêtes on a en réalité $n\log n$.\\
+On peut toujours se ramener à un problème de décision.\\
+
+Exemple : la factorisation des entiers. On a en entrée $N, M$ entier $\leqslant N$ de taille $n=\log N$.\\
+Question : Existe-t-il un diviseur $d$ de $N$ tel que $1 < d \leqslant M$ ?
+\begin{figure}[h]
+	\centering
+  \scalebox{0.8}{\input{facto.pdf_t}}
+\end{figure}
+
+On utilise la dichotomie pour résoudre le problème initial en prenant $M = \frac{N}{2} $. On a $\log n$ questions à l'oracle pour $d$.
+
+\section{Passage du semi-formel au formel}
+Un problème de décision est un langage. Une instance est un élément de $\Sigma ^*$ où $\Sigma ^*$ est un alphabet fini (par exemple $ \Sigma = \{0,1\} $ ). Le langage $ L \subset \Sigma $ est l'ensemble des instances "positives" (dont la réponse est oui). On doit reconnaitre L avec une machine. 
+\paragraph{Qu'est-ce qu'une machine ?\\}
+Une machine simple est un automate. Par exemple, l'automate qui suit 
+\begin{figure}[h]
+	\centering
+  \scalebox{0.5}{\input{automate.pdf_t}}
+\end{figure}
+ accepte les mots se finissant par 1.\\
+Un langage reconnaissable par un automate est un langage rationnel (régulier).\\
+
+Machine de Turing :\\
+
+\begin{tabular}{c|c|c|c|c|c|c|c}\hline
+-3 & -2 & -1 & 0 & 1 & 2 & 3 & 4 \\\hline 
+b &b& b& b& $x_1$ & $x_2$ & $x_3$ & b \\\hline
+\end{tabular}\\
+
+alphabets : $\Sigma$  et $\Gamma \supset \Sigma \cup \{b\} $\\
+
+Opération élémentaire (transition) :
+\begin{itemize}
+\item La machine est dans l'état $q_i$ et lit le symbole $s \in \Gamma$.
+\item Elle écrit $t$ (au lieu de $s$), $ t\in \Gamma$.
+\item Elle se déplace de $\{-1,0,1\}$.
+\item Elle change d'état $q_i \rightarrow q_j$, $Q=\{q_0,\ldots,q_n,q_A,q_R\}$.
+\end{itemize}
+Fonction de transition $\delta$ : $Q\times \Gamma \longrightarrow Q\times \Gamma \times \{-1,0,1\}$\\
+Calcul : entre : $x_1,x_2,\ldots, x_m$, curseur en position 1, état $q_0$. La suite de transition s'arrête si on a $q_A$ ou $q_R$.\\
+Temps de calcul : $t_m(x) = $ nombre de transitions jusqu'à $q_A$ ou $q_R$ (on peut avoir $\infty$). Le langage reconnu par M est : 
+$L_M =\{x \in \Sigma^*, M $ accepte $ x\}$.\\
+Tableau :\\
+
+\begin{tabular}{|c|c|c|c|}\hline
+ & b & 0 & 1 \\\hline
+$q_0$ & b,R,0 & 0,$q_0$,$+1$ & 1,$q_1$,$+1$ \\\hline
+$q_1$ & b,A,0 & 0,$q_0$,$+1$ & 1,$q_1$,$+1$ \\\hline
+\end{tabular}\\
+En résumé :
+\begin{itemize}
+\item Algorithme = machine de Turing 
+\item Problème = Langage ($\subset \Sigma^*$)
+\end{itemize}
+On a $t_M$ qui est la complexité de la machine M (en temps)
+
+\paragraph{Définition :} machine de Turing universelle (ordinateur)\\
+La machine $U$ prend comme entrée $<M>$ qui est la description de la machine M et $x$ et U retourne ce que retourne M sur l'entrée $x$.
+\paragraph{Théorème :\\}
+Il existe des machines de Turing universelles.\\
+On a $t_U(<M>, x) \leqslant c |x| t_M(x)$ avec $|x|$ longueur de $x$.
+
+\chapter{Complexité en temps}
+\section{Problèmes faciles ?}
+\paragraph{Définition :\\}
+La classe P est l'ensemble des langages polynomiaux.
+\paragraph{Définition :\\}
+L est un langage polynomial si $\exists$ M et un polynôme $P(X) \in \mathbb{Z}[X]$ tels que $ \forall x \in \Sigma^*,\ t_M(x) \leqslant P(|x|)$ et M reconnait L.
+
+\section{Problèmes difficiles ?}
+\paragraph{Exemples :}
+\begin{itemize}
+\item Circuit hamiltonien (CH) :
+\begin{itemize}
+\item[I:] graphe
+\item[Q:] existe-t-il un circuit hamiltonien dans ce graphe ?
+\end{itemize}
+\item Satisfaisabilité  (SAT) : 
+\begin{itemize}
+\item[I:] formule booléenne : $f=(x_1 \cup x_2 \cup \bar{x_4} ) \cap (x_2 \cup \bar{x_5})$
+\item[Q:] $\exists ? (a_1,\ldots,a_n) \in \{0,1\}^n,\ f(a_1,\ldots, a_n)= 1$ (vrai)
+\end{itemize}
+\item FBQ :
+\begin{itemize}
+\item[I:] $\forall x_1, \exists x_2, \forall x_3,x_4,\ f(x_1,\ldots,x_n)= 1$
+\item[Q:] Vrai ou faux ?
+\end{itemize}
+\item Clique
+\begin{itemize}
+\item[I:] graphe G, $k \in \mathbb{N}$
+\item[Q:] existe-t-il une clique (sous graphe complet) de taille $k$  ?
+\end{itemize}
+\item 10ème problème de Hilbert :
+\begin{itemize}
+\item[I:] un polynôme $P(X_1,\ldots,X_n) \in \mathbb{Z}[X_1\ldots X_n]$
+\item[Q:] $ \exists (a_1,\ldots,a_n) \in \mathbb{Z}^n,\ P(a_1,\ldots,a_n) = 0$ ?
+\end{itemize}
+\item Voyageur de commerce (VC) :
+\begin{itemize}
+\item[I:] graphe G, $p_1,\ldots p_m \in \mathbb{N}, k \in \mathbb{N}$ avec $p_i$ poids de $a_i$
+\item[Q:] Existe-t-il un parcours de tous les sommets du graphe où la somme des longueurs des arêtes parcourues est $<k$ ?
+\end{itemize}
+\item k-coloration :
+\begin{itemize}
+\item[I:] graphe, $k\in \mathbb{N}$
+\item[Q:] Peut-on colorier les sommets avec $k$-couleurs ?
+\end{itemize}
+\end{itemize}
+\paragraph{Définition :\\}
+Un langage L est dit certifiable en temps polynomial si $\exists M$ et $P(X)$ tel que pour tout $x \in L$, $\exists y \in \Sigma^*$ tel que sur l'entrée $(x,y)$, M aboutit à l'état $q_A$ en temps :
+$$ t_M(x,y) \leqslant P(|x|) $$
+D'où, la classe NP est l'ensemble des langages certifiables en temps polynomial.\\
+Conjecture : $P \neq NP$.
+\paragraph{Réduction polynomiale\\}
+$\varphi : \Sigma^* \longrightarrow \Sigma^*$ est une réduction polynomiale de L vers L' si :
+\begin{itemize}
+\item $\varphi$ est calculable en temps polynomial
+\item $l\in L \Longleftrightarrow \varphi(l) \in L'$
+\end{itemize}
+\paragraph{Définition :\\}
+$L \propto L'$ si $\exists \varphi$ réduction de L vers L'.\\
+Exemple : CH $ \propto$ VC, $\varphi : G \rightarrow (G,p_1=\ldots =p_n=1,k=n)$
+\paragraph{Définition : }Complétude \\
+$\Lambda$ est NP-complet si :
+\begin{itemize}
+\item $\Lambda \in NP$
+\item $\forall L \in NP,\ L \propto \Lambda$
+\end{itemize}
+\paragraph{Théorème :\\}
+Il existe un problème NP-complet.
+\subparagraph{Exemple d'un tel problème :} Arrêt en temps limité
+\begin{itemize}
+\item[I:] $<M>,\ x \in \Sigma^*,\ 1^t = 11\ldots1\ (\mbox{t fois})$
+\item[Q:] Est qu'il existe $y \in \Sigma^*$ tel que $M$ s'arrête sur $q_A$ sur l'entrée $(x,y)$ en temps $\leqslant t$ ?
+\end{itemize}
+\subparagraph{Théorème :\\}
+L'arrêt en temps limité est NP-complet.
+\subparagraph{Preuve :\\}
+\begin{itemize}
+\item Problème dans NP ?\\
+Le certificat est $y$. Soit U une machine de Turing universelle, U exécute le déroulement de $M$ sur l'entrée $(x,y)$ et $1^t$.
+\item $\forall L \in NP,\ L \propto \Lambda $ ?\\
+$L$ vient avec $M_L$, $P$ un polynôme, tels que $x \in L \Longleftrightarrow \exists L,\ M_L $ accepte $(x,y)$ en temps $\leqslant P(|x|)$
+$$ x \longmapsto <M_l>,\ x,\ 1^{P(|x|)}$$
+$x \in L \Longleftrightarrow \exists y$ tel que $M_L$ s'arrête sur $(x,y)$ en temps $\leqslant P(|x|)$\\
+$ x \in L \Longleftrightarrow f(x) \in \Lambda $
+\end{itemize}
+\paragraph{Théorème de Cook\\}
+SAT est NP-complet.
+\paragraph{Exemple de réduction polynomiale \\}
+Le problème CLIQUE :
+\begin{itemize}
+\item[I:]G graphe, $k \in \mathbb{N}$
+\item[Q:]existe-il une clique de G (sous graphe complet) de taille $k$ ?
+\end{itemize}
+\begin{figure}[h]
+	\centering
+  \scalebox{0.8}{\input{clique4.pdf_t}}
+\end{figure}
+
+\subparagraph{Proposition :\\}
+CLIQUE est NP-complet.
+\subparagraph{Preuve :\\}
+$$ SAT \propto CLIQUE $$
+\begin{figure}[h]
+	\centering
+  \scalebox{0.8}{\input{schema_sat_clique.pdf_t}}
+\end{figure}
+
+
+\subparagraph{Proposition :\\}
+Si $\Lambda$ est NP-complet et si $\Lambda \propto L$ et $L\in NP$ alors $L$ est NP-complet. (car si $L \propto L'$ et $L' \propto L''$ alors $L \propto L''$)\\
+
+Exemple : $f=(x_1 \cup x_2 \cup x_3) \cap (x_1 \cup \bar{x_2} \cup x_4) \cap (\bar{x_1} \cup x_3 \cup \bar{x_4})$ donne un graphe G avec $ \#$sommets $=$ longueur de f $=\#$litéraux.
+
+\begin{figure}[h]
+	\centering
+  \scalebox{0.7}{\input{exemple_clique.pdf_t}}
+\end{figure}
+
+Il faut des arêtes partout sauf :
+\begin{itemize}
+\item entre sommets issus d'une même clause
+\item entre 2 sommets issus de $x_i$ et $\bar{x_i}$
+\end{itemize}
+$k=\#$clauses (ici $k=3$)\\
+f satisfaisable $\Leftrightarrow $ G admet une $k$-clique.\\
+$\Rightarrow$ : Si f est satisfaisable, il existe dans chaque clause, un litéral de valeur 1. Cela donne une clique dans G.\\
+$ \Leftarrow $ : Si on a une $k$-clique, il est possible de mettre un terme dans chaque clause à 1.
+\section{Classe NP et fonctions à sens unique}
+\paragraph{Définition :} Fonction à sens unique\\
+$f : \Sigma^* \longrightarrow \Sigma^*$
+\begin{itemize}
+\item $Dom(f)$ est infini
+\item f est calculable en temps polynomial
+\item $\not\exists  M$ machine, polynome $P$ tel que $\forall y \in Im(f)$, $M$ calcule $x$ tel que $f(x)=y$ en temps $\leqslant P(|y|)$.
+\item $\exists P$ polynome, $\forall y \in Im(f)$, il existe $x$, $|x| \leqslant P(|y|)$ tel que $f(x)=y$ car sinon on peut prendre $f(x)=\log |\log |x||$
+\end{itemize}
+\paragraph{Théorème :\\}
+Il existe $f$ fonction à sens unique $\Longleftrightarrow P\neq NP$\\
+
+$\Rightarrow$ : On construit le problème suivant :
+\begin{itemize}
+\item[I:] $x,y \in \Sigma^*,\ P$ polynome
+\item[Q:] $\exists z \in \Sigma^*$, $f(xz)=y$ ? et $|z| \leqslant P(|y|)$
+\end{itemize}
+\begin{itemize}
+\item problème dans NP ? Oui, z est le certificat
+\item Si f à sens unique, le problème $\not\in P$. Sinon, on calcule rapidement un antécédent de $y$. On prend $y$ et on pose $Q$ avec $x=0$ si non $x=1$ si oui, $x=10$ ou $x=11$ ? Et ainsi de suite...\\
+$\#$appels au problème de décision est de $2p(|y|)$.
+\end{itemize}
+$\Leftarrow$ Soit $\varphi : \Sigma^* \rightarrow \Sigma^* \times \Sigma^* $ une bijection, calculable en temps polynomial. 
+$$ \{0,1\}^* \rightarrow \{0,1\}^* \times \{0,1\}^* $$
+Par exemple : $ E \subset \{0,1\}^* \rightarrow \mathbb{N} $
+$ \mbox{ écriture en base 2 } \leftarrow n $\\
+$L \in NP$ avec $(M_L,p_L())$, $z\in \Sigma^* : z \longmapsto \varphi(z) = (\varphi_1(z), \varphi_2(z))=(x,y)$
+$f(z)=\left\{ \begin{array}{l}
+1) x \in L, y \mbox{ certificat de x alors } f(z)=x \\
+2) \mbox{ sinon f n'est pas définie en z } \end{array} \right. $
+\begin{enumerate}
+\item $f$ calculable
+\item $f$ à sens unique car si $\exists M$ tel que $x\mapsto z$ tel que $f(z)=x$ alors $x : M \mapsto z \mapsto \varphi(z) = (x,y)$ avec y certificat de $x\in L$. A partir de $x$, on trouverait le certificat, M fabriquerait donc des certificats ce qui est impossible.
+\end{enumerate}
+\paragraph{Variantes de SAT}
+$ SAT \propto 3-SAT $ (et $ 3-SAT \propto SAT$)\\
+Qu'en est -il de $2-SAT$ ? $\longrightarrow 2-SAT \in P$\\
+Autre variante : SATC (Satisfaisabilité en circuit)
+
+\begin{figure}[h!]
+	\centering
+  \scalebox{0.5}{\input{schema_SATC.pdf_t}}
+\end{figure}
+
+\paragraph{Proposition :\\}
+$SAT \propto SATC$ \\
+$(x_1 \cup x_2) \cap (x_1 \cup \bar{x_2} \cup x_3) \longrightarrow C $
+
+\begin{figure}[h!]
+	\centering
+  \scalebox{0.5}{\input{schema_circuit.pdf_t}}
+\end{figure}
+
+\paragraph{Proposition :\\}
+$SATC \propto SAT $
+\paragraph{Réduction :\\}
+Il faut ajouter des variables auxiliaires, autant que d'arêtes (arcs) issues des portes du circuit.
+\subparagraph{Porte Non\\}
+$y=\bar{x_1} \Leftrightarrow (x_1\cup y) \cap (\bar{x_1} \cup \bar{y}) = 1 $
+
+\begin{figure}[h!]
+	\centering
+  \scalebox{0.7}{\input{negation.pdf_t}}
+\end{figure}
+
+\subparagraph{Porte Et}
+$z=x\cap y \Leftrightarrow (\bar{x} \cup \bar{y} \cup z) \cap (x \cup \bar{y} \cup \bar{z}) \cap (\bar{x} \cup y \cup \bar{z}) \cap (x \cup y \cup \bar{z}) = 1 $
+ 
+\begin{figure}[h!]
+	\centering
+  \scalebox{0.7}{\input{et.pdf_t}}
+\end{figure}
+
+\subparagraph{Porte Ou}
+$z=x \cup y \Leftrightarrow (x\cup y \cup \bar{z}) \cap (x \cup \bar{y} \cup z) \cap(\bar{x} \cup y \cup z)\cap(\bar{x}\cup \bar{y} \cup z) =1 $
+
+\begin{figure}[h]
+	\centering
+  \scalebox{0.7}{\input{ou.pdf_t}}
+\end{figure}
+
+\paragraph{Théorème de Cook :\\}
+SAT est NP-complet.
+\paragraph{Preuve :\\}
+Il suffit de montrer que SATC est NP-complet.
+\subparagraph{Stratégie :\\}
+Le circuit a pour entrées $x_1 \ldots x_n y_1 \ldots y_m $ et le circuit renvoie 1 si $y_1 \ldots y_m$ est un certificat de $x$. Si $x \in L$, $ \exists y$ tel que $|y|\leqslant p_L(|x|)$, $M$ accepte $(x,y)$ en temps $\leqslant p_L(|x|)$.
+\subparagraph{Tableau de calcul :\\}
+Paramètre : $t=p_L(|x|)$
+$$\begin{array}{|c|c|c|c|c|c|c|c|c|c|c|c|} \hline
+-t & \ldots & \ldots & \ldots & -1 & 0& 1 & 2 & \ldots & n & \ldots  & t \\\hline
+ \ldots & \ldots & \ldots & \ldots & y_1 & b & x_1 & x_2 & \ldots & x_n &  \ldots & \ldots \\\hline
+\end{array}$$
+On construit le tableau $(T_{ij})_{i=1\ldots t, j = -t \ldots t} $ de taille $t \times 2t+1$.
+
+\begin{figure}[h]
+	\centering
+  \scalebox{0.5}{\input{tableau.pdf_t}}
+\end{figure}
+
+On a $T_{ij} =(a_{ij}, h_{ij}, q_{ij})$ avec :
+\begin{itemize}
+\item $a_{ij} =$ contenu de la case $j$ au temps $i$
+\item $h_{ij} = \left\{ \begin{array}{l}
+1 \mbox{ si le curseur est en j au temps i } \\
+0 \mbox{ sinon} \end{array} \right. $
+\item $q_{ij} =  \left\{ \begin{array}{l}
+\mbox{état dans lequel est M au temps i si } h_{ij}=1 \\
+0 \mbox{ sinon} \end{array} \right. $
+\end{itemize}
+
+\subparagraph{Point cl: \\}
+
+\begin{figure}[h!]
+	\centering
+  \scalebox{0.7}{\input{Tij.pdf_t}}
+\end{figure}
+
+$T_{i+1\ j}$ est fonction déterministe de $T_{i\ j-1}, T_{ij}, T_{i\ j+1}$
+\subparagraph{Circuit :\\}
+entrée : $x_1, \ldots, x_n$ (constantes), $y_1, \ldots, y_m \in \Sigma \cup \{b\}$. \\
+Toute fonction $F \rightarrow F$ est représentable par un circuit fini. A la fin, la sortie est 1 s'il existe $q_A$ dans la dernière ligne.
+
+\paragraph{2-SAT :}
+\subparagraph{Proposition :}
+2-SAT est polynomial.
+\begin{itemize}
+\item[I:] $f=C_1 \cap C_2 \cap \ldots \cap C_k$ avec $C_i = x \cup y $
+\item[Q:] f satisfaisable ?
+\end{itemize}
+\subparagraph{Exemple :} $(x \cup y) \cap (\bar{x} \cup y) \cap (x \cup \bar{y}) \cap (\bar{x} \cup \bar{y})$\\
+Idée : graphe orienté avec pour sommets les litéraux. On a : $a \cup b$ devient $\bar{a} \rightarrow b$ et $ \bar{b} \rightarrow a$
+
+\begin{figure}[h!]
+	\centering
+  \scalebox{0.7}{\input{graphe_oriente.pdf_t}}
+\end{figure}
+
+
+\subparagraph{Proposition :\\} 
+f est satisfaisable si et seulement si $\nexists x$ tel que $x \rightarrow \bar{x}$ et $ \bar{x} \rightarrow x$.
+
+\section{Pspace, RP, BPP}
+\subsection{Pspace}
+Au dessus de NP, on a Pspace, espace polynomial.
+\paragraph{Définition :} Pspace \\
+Pspace est la classe des langages L tels que $\exists M$ et un polynome P tels que sur l'entrée $(x_1,\ldots,x_n),\ \forall x \in \Sigma^*,\ M$ décide si $x \in L$ en temps $\leqslant 2^{q(|x|)}$ avec q un polynome. $|\Gamma|^{2m+1}|\mbox{états}|(2m+1)$ majore le nombre d'itérations (sinon la machine boucle).
+
+\paragraph{Proposition :} $NP \subset Pspace $
+\paragraph{Preuve :\\}
+Soit $L \in NP$. L'algorithme est de passer en revue tous les certificats y possibles.
+
+\paragraph{Conjecture :\\}
+$ P \subsetneq NP \subsetneq Pspace $
+
+\paragraph{Définition :\\}
+Un langage L est dit Pspace-complet si :
+\begin{itemize}
+\item $L \in $ Pspace 
+\item $\forall L' \in$ Pspace, $L' \propto L$
+\end{itemize}
+\paragraph{Théorème :\\}
+FBQ est Pspace-complet.
+\begin{itemize}
+\item[I:] $\forall x_1,\ \exists x_2, x_3,\ \forall x_4,\ f(x_1,x_2,\ldots,x_n) = 1 $
+\item[Q:] vrai ou faux ?
+\end{itemize}
+
+\subsection{Algorithmes probabilistes polynomiaux}
+\paragraph{Exemple :} Test de (non)-primalité\\
+Solovay - Strassen : \\
+On a en entrée $n$, avec $a$ aléatoire, a-t-on $a^{\frac{n-1}{2}} = \left(\frac{a}{n}\right) \mod n$ ? Si non, $n$ n'est pas premier.
+Si $n$ n'est pas premier, on a :
+$$ \frac{\#\{a \in (\mathbb{Z}/n\mathbb{Z})^*,\ a^{\frac{n-1}{2}} \neq \left(\frac{a}{n}\right) \mod n \}}{\varphi(n)} \geqslant \frac{1}{2} $$
+
+\paragraph{Définition :} RP \\
+Soit $L$ un langage, $\exists M$ et $p$ un polynome tels que pour toute entrée $x$, il existe un ensemble de certificats $Y$, de taille $\leqslant p(|x|)$ tel que pour tout $(x,y)$ donnés à $M$ :
+\begin{itemize}
+\item si $x \not\in L$, $M$ rejette $(x,y)$ avec une probabilité $1$ (pour tout $y \in Y$)
+\item si $x \in L$, $M$ accepte $(x,y)$ avec une probabilité $\geqslant \frac{1}{2} $ (pour une moitié des $y$).
+\end{itemize}
+M calcule en temps polynomial.
+
+\paragraph{Proposition :\\}
+$ RP \subset NP $ et $P \subset RP$
+
+\paragraph{Définition :} BPP\\
+Soit un langage $L$, $\exists M$ et un polynome $p$ tel que pour toute entrée $x$, il existe un ensemble de certificats $Y$, de taille $\leqslant p(|x|)$, tel que pour tout $(x,y)$:
+\begin{itemize}
+\item si $x \not\in L$, $M$ rejette $(x,y)$ avec une probabilité $> \frac{2}{3} $
+\item si $x \in L$, $M$ accepte $(x,y)$ avec une probabilité $> \frac{2}{3} $
+\end{itemize}
+
+On a : $RP \subset BPP$ et $ RP \subset NP $
+\end{document}

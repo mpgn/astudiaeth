@@ -1,0 +1,49 @@
+default(colors,darkbg)
+
+p = 1719620105458406433483340568317543019584575635895742560438771105058321655238562613083979651479555788009994557822024565226932906295208262756822275663694111;
+
+
+factors=factor(p-1);
+factors=factors[,1];
+Nf=length(factors);
+
+
+
+{isgenerator(x)=
+local(rep);
+rep=1;
+for(k=1,Nf,if(x^((p-1)/factors[k])==Mod(1,p),rep=0));
+return(rep);
+}
+
+biggene=Mod(19,p);
+
+cofactors=vector(Nf,k,(p-1)/factors[k]);
+smallgene=vector(Nf,k,biggene^cofactors[k]);
+
+
+
+bez = mathnf(Mat(cofactors),1);
+bez=bez[2];
+bez=bez[,Nf];
+
+
+{DL(x)=
+local(l,xk);
+l=vector(Nf);
+for(k=1,Nf,
+xk=x^(cofactors[k]*bez[k]);
+l[k]=0;
+while(xk!=smallgene[k]^l[k],l[k]=l[k]+1);
+);
+return(sum(k=1,Nf,l[k]*cofactors[k])%(p-1));
+}
+
+
+
+
+
+? DL(Mod(2,p))
+%13 = 1495011476598350318814678175168195290113677501106371103322247803922196575176277030462657259797316339730122246208643881148513446840345993611313761500811248
+? biggene^%
+%14 = Mod(2, 1719620105458406433483340568317543019584575635895742560438771105058321655238562613083979651479555788009994557822024565226932906295208262756822275663694111)

@@ -1,0 +1,43 @@
+default(colors,darkbg)
+
+p = nextprime(random(2*10^3));
+q = nextprime(random(2*10^3));
+n = p*q;
+
+{friable(n,B)=
+local(q);
+q=n;
+forprime(p=2,B,while(q%p==0,q=q/p));
+return((q==1));
+}
+
+{relation(n,B)=
+local(x,y);
+until(friable(y,B),x=random(n);y=centerlift(Mod(x,n)^2));
+return([x,y]);
+}
+
+M=matrix(10,5);
+G=vector(10);
+
+B=7;
+{for(r=1,10,
+R=relation(n,B);
+G[r]=R[1];
+M[r,1]=sign(R[2]==(-1));
+s=0;
+forprime(q=2,B,s=s+1;M[r,s]=valuation(R[2],q));
+)}
+
+
+noyau=lift(matker(M~*Mod(1,2)));
+
+{for(l=1,length(noyau),
+mD=1;
+s=0;
+expos=noyau[,l]~*M;expos=expos/2;
+forprime(q=2,B,s=s+1;mD=mD*q^expos[s]);
+mG=G*noyau[,l];
+print(gcd(n,mG-mD));
+)
+}

@@ -1,0 +1,11 @@
+Cours en 4 partie.
+
+1e partie : Présentation et Java Card.   avec Damien Sauveron
+	support : qui ne peut pas etre diffuser.
+
+2e partie : Preuve Formelle.	avec Oliver Li
+	uniquement des TP : étude de 2 outils : EscJava & Smv
+
+3e partie : Cryptanalyse sur cartes à puce. 	avec Christophe Giraud
+
+4e partie :
