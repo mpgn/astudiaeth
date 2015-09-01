@@ -1,8 +1,6 @@
 # Master CSI
 
 Site Web http://mastercsi.labri.fr/ <br />
-Blog étudiant: http://journaldumaster.stats.yt/category/master-info/master-csi/ <br />
-IRC: #mastercsi <br />
 
 Ce dépôt rassemble les différents cours et examens des années précédentes pour le Master CSI. Ce dépot essaye avant tout de vous apporter une aide dans vos futures révisions, n'hésitez pas à participer pour les futurs éléves. 
 Nous vous souhaitons de bonnes révisions ! 
