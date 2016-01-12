@@ -1,0 +1,155 @@
+# TD1
+
+## Prise en main Pari/GP
+### 1
+>isprime(2^(2^(11)) + 1)
+%1 = 0
+
+1 si premier
+0 si non premier
+
+### 2
+>gcd (42,5)
+1
+
+42 et 5 sont premiers entre eux. le groupe (Z/42Z) x (Z/5Z) est cyclique avec le thÃ©orÃ¨me chinois
+
+### 3
+>znstar(130)
+[48, [12, 4], [Mod(41, 130), Mod(27, 130)]]
+
+#### 4
+> P = ffinit(2,4)
+Mod(1, 2)*x^4 + Mod(1, 2)*x^3 + Mod(1, 2)*x^2 + Mod(1, 2)*x + Mod(1, 2)
+> P = ffinit(2,3)
+Mod(1, 2)*x^3 + Mod(1, 2)*x^2 + Mod(1, 2)
+
+ffinit: permet de trouver le polynÃ´me minimal dans F2 de degrÃ© 4.
+
+#### 5
+##### Base2
+base2(n) = {
+my (q,vec);
+q = n;
+vec = [];
+while (
+      q != 0,
+      vec = concat (vec, q % 2);
+      q = q \ 2;
+      );
+return (vec);
+}
+
+##### Puissance
+puissance(n,k) = {
+my (q, vec, base);
+q = n;
+base = base2(k);
+vec = 1;
+for (i=1, length(base),
+     if (base[i] == 1, vec = vec * q);
+
+     q = q ^ 2;
+     );
+
+return (vec);
+}
+
+##### Puisance dans Z/mZ
+puissanceMZ(n,k,m) = {
+my (q, vec, base);
+q = n;
+base = base2(k);
+vec = 1;
+for (i=1, length(base),
+     if (base[i] == 1, vec = (vec * q) % m);
+
+     q = (q ^ 2) % m;
+     );
+
+return (vec);
+}
+
+> puissance(2,20) % 13
+= 9
+
+Voici la bonne implÃ©mentation car puissance est algorithme gÃ©nÃ©rique:
+> puissance(Mod(2,13),20)
+= Mod(9, 13)
+
+
+/* Exercice 1.5 */
+
+  /* Calcul du dÃ©veloppement de n en base 2 */
+
+  base2(n) =
+{
+    my(q,vec);
+      q=n;
+        vec=[];
+
+          while(q!=0,
+                  vec=concat(vec,q%2);
+                      q=q\2;
+                        );
+            return(vec);
+}
+
+/* Algorithme d'exponentiation dans N */
+puissance(x,n) =
+{
+    my(y,z);
+      y=1;
+        z=x;
+          v=base2(n);
+
+            for(i=1,length(v),
+                    if(v[i]!=0, y=y*z);
+                        z=z^2;
+                          );
+              return(y);
+}
+
+
+/* Exercice 2.1 */
+/* RÃ©ciproque du petit thÃ©orÃ¨me de Fermat */
+test_fermat(n) =
+{
+    for(b=2,n-1,
+            if(Mod(b,n)^n!=Mod(b,n), return(0));
+              );
+      return(1);
+}
+
+
+/* Liste les nombres de Carmichael infÃ©rieurs Ã  q */
+carmi(q) =
+{
+    for(r=2,q,
+            if(isprime(r)==0,
+                    if(test_fermat(r)==1, print(r))));
+}
+
+/* Exercice 2.2 */
+squares(m)={
+    v=[];
+      for(i=0,m-1,
+              v=setunion(v,[Mod(i^2,m)]);
+                );
+        return(v);
+}
+squares(m)={
+    v=[];
+      for(i=0,m-1,
+              if(issquare(Mod(i,m)),v=concat(v,Mod(i^2,m)));
+                );
+        return(v);
+}
+
+/* Exercice 2.3 */
+P=x^5+x^4+2*x^3-2*x^2-4*x-3
+factor(P)
+poldisc(P)
+factormod(P,2)
+factor(Mod(P,2))
+
