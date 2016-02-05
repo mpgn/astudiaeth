@@ -1,0 +1,39 @@
+/* Correction TD 2 */
+
+/* 1.Résultant */
+/* 1) */
+>P = x^3 - 1
+>Q = x^2 + 3*x + 1
+
+* charpoly(w) pour connaitre la caractéristique d'un polynome
+* polresultant(P, Q) donne la résultante du polynome
+
+> polresultant(P, Q)
+= 20
+
+* Théorème: Si p ne divise pas le coefficient de plus haut degré de P ou de Q:
+*  	    Res(f mod p, g mod p) = Res(f, g) mod p
+
+
+*	    Res(P, Q) = 0 mod p <=> p / 20
+       	      	    <=> p = 2 ou p = 5
+
+/* 2) */
+* A(x) = x^3 + 5*x + 7 = (x - a_1)(x - a_2)(x - a_3)
+* B(x) = (x - (a_1)^2)(x - (a_2)^2)(x - (a_3)^2)
+
+> polresultant(A, y - x^2)
+= y^3 + 10*y^2 + 25*y - 49
+
+* Ici on a a = x et x = y
+* Donc B(x) = x^3 + 10*x^2 + 25*x - 49
+
+/* 3) */
+> f= x*(1+t^2)^3 - (4*t*(1-t^2)^2)
+> g= y*(1+t^2)^3 - (8*t^2*(1-t^2)^2)
+> polresultant(f,g,t)
+= 1073741824*x^6 + (805306368*y^2 - 2147483648*y)*x^4 + (201326592*y^4 + 1073741824*y^3)*x^2 + (16777216*y^6 - 134217728*y^5)
+
+/* 4) */
+>poldisc(x^3 + a*x + b)
+-4*a^3 - 27*b^2
