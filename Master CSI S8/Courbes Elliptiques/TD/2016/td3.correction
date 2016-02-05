@@ -1,0 +1,95 @@
+# TD3: Le logarithme discret
+
+##Question 1
+
+* Prend en paramètre k et renvoie (p, q, g) tel que q soit un nombre premier de k bits et p un premier tels que p - 1 = 2q et g un élément de (Z/pZ)* d'ordre q
+
+function1(k) = {
+	     my (p = 0, q = 0, g = 0, G);
+	     while(isprime(q) == 0 || length(binary(q)) != k || isprime(2 * q + 1) == 0, q = random(2^k););
+	     p = 2 * q + 1;
+	     g = znprimroot(p)^2;
+
+	     return ([p, q, g]);
+}
+
+## Question 2
+
+logDiscretNaive(h,g) = {
+		     my (x = 1, f = g);
+		     while(h != f, f = f * g; x = x + 1;);
+		     return (x); 
+}
+
+* On fait function1(k) et on récupère g. On génère h = g^i avec i un nombre aléatoire, puis on lace la fonction:
+* logDiscretNaive(h, g)
+> logDiscretNaive(1487815647197611695910312681741273570332356717154798949898498305086387315423300999654757561928633305897036801, 49)
+=64
+* ie: ici on a 49^64
+## Baby Step/ Giant Step
+* Version avec une recherche dans la liste en O(n)
+babyStep(n, a, b) = {
+	    my (m = floor(sqrt(n)) + 1, y = b, in = 1 / a^(m));
+	    t=[];
+
+	    for (i = 0, m,
+	    	t = concat(t, [i, a^i]);
+		);
+
+	    for (j = 0, m - 1,
+	    	for (k = 0, m,
+		    if (t[k + 1] == y, return (j*m + t[k]));
+		    );
+		    y = y * in;
+		);
+}
+
+*Version avec une recherche en O(log(n)) car la liste est triée. On fait une rechercher dichotomique
+
+
+babyStep2(n, a, b) = {
+	    my (m = floor(sqrt(n)) + 1, y = b, in = 1 / a^(m));
+	    t=[[]];
+
+	    for (i = 0, m,
+	    	t = concat(t, [[i, a^i]]);
+		);
+
+	    for (j = 0, m - 1,
+	    	for (k = 0, m,
+		    if (t[k + 1][2] == y, return (j*m + t[k][1]));
+		    );
+		    y = y * in;
+		);
+}
+
+* Version de Simon inspirée du cours
+babyGiant2(h, g, p, q) = {
+	      my(m, L, M, tmp);
+	      m = floor(sqrt(q)) + 1;
+	      L = [];
+	      for (a = 0, m,
+	      	  L = concat(L, [[Mod(g^(m*(a)), p), a]]);
+		  );
+
+	 	  L = vecsort(L, 2);
+		  print (L);
+		  for (b = 0, m-1,
+		      tmp = h*g^(-b);
+		      print (tmp);
+		      if (tmp == 1,
+		      	 return (b);
+		  	 );
+		  	 for (i = 1, m,
+		  	     if (tmp == L[i+1][1],
+		  	     	print (L[i+1][2]);
+		  		print (m);
+		  		print(b);
+		  		return ((L[i+1][2]*m + b));
+		  		);
+		  	);
+		  );
+return (-1);
+}
+		
+	    	
