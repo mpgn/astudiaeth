@@ -1,24 +1,27 @@
 # TD1
 
 ## Prise en main Pari/GP
-### 1
+### 1)
 >isprime(2^(2^(11)) + 1)
-%1 = 0
+1 = 0
 
 1 si premier
 0 si non premier
 
-### 2
+### 2)
 >gcd (42,5)
 1
 
-42 et 5 sont premiers entre eux. le groupe (Z/42Z) x (Z/5Z) est cyclique avec le thÃ©orÃ¨me chinois
+42 et 5 sont premiers entre eux. le groupe (Z/42Z) x (Z/5Z) est cyclique avec le théorème chinois
 
-### 3
+### 3)
+> ?znstar
+znstar(n): 3-component vector v, giving the structure of (Z/nZ)^*. v[1] is the order (i.e. eulerphi(n)), v[2] is a vector of cyclic components, and v[3] is a vector giving the corresponding generators.
+
 >znstar(130)
 [48, [12, 4], [Mod(41, 130), Mod(27, 130)]]
 
-#### 4
+#### 4)
 > P = ffinit(2,4)
 Mod(1, 2)*x^4 + Mod(1, 2)*x^3 + Mod(1, 2)*x^2 + Mod(1, 2)*x + Mod(1, 2)
 > P = ffinit(2,3)
@@ -26,14 +29,13 @@ Mod(1, 2)*x^3 + Mod(1, 2)*x^2 + Mod(1, 2)
 
 ffinit: permet de trouver le polynÃ´me minimal dans F2 de degrÃ© 4.
 
-#### 5
+#### 5)
 ##### Base2
 base2(n) = {
 my (q,vec);
 q = n;
 vec = [];
-while (
-      q != 0,
+while (q != 0,
       vec = concat (vec, q % 2);
       q = q \ 2;
       );
