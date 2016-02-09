@@ -1,0 +1,272 @@
+\\ Tapper dans gp : read("tp1-correction") en ayant lancé gp depuis le répertoire qui contient ce fichier
+
+
+\\ Exo 1
+
+\\ entrée k : un entier
+\\ sortie : (p,q,g) avec q premier de k bits, p-1=2q, p premier et g d'ordre q modulo p
+gen(k) = 
+{
+   my(r,p,q,g,c);
+   \\ q premier de k bits et p premier p = 2q+1
+   r = 2^(k-1) + random(2^(k-1));
+   q = nextprime(r);
+   p = 2*q+1;
+   while(!ispseudoprime(p),    
+	 r = 2^(k-1) + random(2^(k-1));
+	 q = nextprime(r);
+	 p = 2*q+1);
+
+   /* g d'ordre q : les élements de (Z/pZ)* sont d'ordre 1 ,2,q ou p-1
+   Soit c dans (Z/pZ)*, soit c^2 = 1 (c est d'ordre divisant 2), sinon g=c^2, et d'ordre q car g^q = c^(2q) = c^(p-1) = 1 */
+   c = 2;
+   g = Mod(c,p)^2;
+   while(g==Mod(1,p),
+	 c = c+1;
+	 g = Mod(c,p)^2;
+	 );
+   
+   return([p,q,g]);
+}
+
+k = 20;
+[p,q,g] = gen(k);
+print("\n Exercice 1\n")
+print("k = ",k);
+print("p = ",p," premier : ",isprime(p));
+print("q = ",q," premier : ",isprime(q), " de ",length(binary(q))," bits");
+\\ znorder : ordre d'un element, attention à la taille de p : znorder doit factoriser p-1 !
+print("g = ",g," d'ordre q : ",znorder(g)==q)
+
+\\ Exo 2
+
+\\ entrée (p,q,g) retourné par gen et h dans le groupe engendré par g
+\\ sortie : le logarithme discret de h en base g
+naif(p,q,g,h) =
+{
+   my(x,f);
+   f = Mod(1,p);
+   x = 0;
+   while(h!=f,
+	 x = x+1;
+	 f = f*g;
+	 );
+   return(x);
+}
+
+print("\n Exercice 2\n")
+
+x = random(q);
+print("on cherche x = ",x);
+h = g^x;
+
+print("Avec la méthode naive, on trouve ",naif(p,q,g,h));
+print("Avec la méthode de Pari, on trouve ",znlog(h,g));
+
+\\ Exo 3
+
+\\ Recherche dichotomique dans un vecteur L contenant des vecteurs de 2 élements, triée par rapport à la première coordonnée
+\\ entrée le vecteur L, x l'élément à chercher, a : l'indice de départ, b : l'indice de fin
+\\ sortie m : tel que a<=m<=b et x = L[m][1], et m = -1 si x est non trouvé
+search(L,x,a,b) =
+{
+   my(m);
+   if (b < a, return(0)); \\ l'élément n'est pas dans l'intervalle considéré
+   m = floor((a + b)/2);
+   if (L[m][1]==x,return(m));
+   if (L[m][1]>x, return(search(L,x,a,m-1))); \\ on recherche dans la première moitié
+   if (L[m][1]<x,return(search(L,x,m+1,b)));   \\ on recherche dans la deuxième moitié
+}
+
+\\ Baby step Giant Step
+\\ entrée (p,q,g,h) retourné par gen et h dans le groupe engendré par g
+\\ sortie : le logarithme discret de h en base g
+
+bsgs(p,q,g,h) =
+{
+   my(m,gm,ginv,L,f,i,s);
+
+   m = ceil(sqrt(q)); 
+   gm = g^m;
+
+   \\ Giant steps L = [g^(mi),i]
+   L = vector(m-1);
+   L[1] = [lift(gm),1]; \\ lift permer de considérer l'élement dans Z plutôt que Z/pZ, pour pouvoir appliquer la fonction de tri
+   for(i=2,m-1,
+      L[i] = [lift(L[i-1][1]*gm), i]; 
+   );
+   L = vecsort(L,1); \\ Tri suivant la première coordonné
+
+   
+   \\ Baby steps
+   
+   ginv = g^(-1);
+   f = h;
+   i = 0;
+   s = search(L,lift(f),1,length(L)); 
+
+   while(s==0,
+	 f = f * ginv;
+	 s = search(L,lift(f),1,length(L)); 
+	 i = i +1;
+	);
+   return(i+L[s][2]*m)
+}
+
+print("\n Exercice 3\n")
+
+xx = bsgs(p,q,g,h);
+print("Avec BSGS, on trouve ",xx)
+
+k = 30;
+[p,q,g] = gen(k);
+print("\nAvec q de ",k," bits");
+x = random(q);
+print("on cherche x = ",x);
+h = g^x;
+xx = bsgs(p,q,g,h);
+print("Avec BSGS, on trouve ",xx)
+
+
+
+\\ Exo 4
+
+
+
+\\ Fonction d'itération pour Pollard rho
+\\ entrée X,i,j,g,h,q, avec X,g,h dans l groupe engendré par g d'ordre q
+\\ et X=g^ih^j
+\\ sortie : f(X),ii,jj tel que f(X)=g^iih^jj
+
+
+
+iteration(X,i,j,g,h,q)=
+{
+   my(val);
+   val=lift(X);
+
+   if(val%3 == 0, return([X^2,(2*i)%q,(2*j)%q]));
+   if(val%3 == 1, return([X*h,i,(j+1)%q]));
+   if(val%3 == 2, return([X*g,(i+1)%q,j%q]));
+			      
+}
+
+\\ Pollard rho
+\\ entrée (p,q,g,h) retourné par gen et h dans le groupe engendré par g
+\\ sortie : le logarithme discret de h en base g
+
+Pollard(p,q,g,h) =
+{
+   my(X,ix,jx,Y,iy,jy);
+
+   ix = random(q);
+   jx = random(q);
+   X = g^ix*h^jx;
+   [X,ix,jx] = iteration(X,ix,jx,g,h,q);
+   [Y,iy,jy] = iteration(X,ix,jx,g,h,q);
+   while(X!=Y,
+	 [X,ix,jx] = iteration(X,ix,jx,g,h,q);
+	 [Y,iy,jy] = iteration(Y,iy,jy,g,h,q);
+	 [Y,iy,jy] = iteration(Y,iy,jy,g,h,q);
+	 );
+   if(gcd(jy-jx,q)!=1, return(-1)); \\ Échec
+   return((ix-iy)/(jy-jx)%q);
+}
+
+print("\n Exercice 4\n")
+
+xxx = Pollard(p,q,g,h);
+print("Avec Pollard, on trouve ",xxx)
+k = 40;
+[p,q,g] = gen(k);
+print("\nAvec q de ",k," bits");
+x = random(q);
+print("on cherche ",x);
+h = g^x;
+xx = Pollard(p,q,g,h);
+print("Avec Pollard, on trouve ",xx)
+
+
+\\ Exo 5
+
+
+
+\\ Algorithme de Pohlig–Hellman
+\\ entrée (p,n,g) avec p premier, g d'ordre n modulo p, et h dans le groupe engendré par g
+\\ sortie : le logarithme discret de h en base g
+
+PohligHellman(p,n,g,h) =
+{
+   my(M,r,x,gg,hh,a,f,pi,ei);
+   \\ factorisation de n
+   M = factor(n); \\ M[,1] -> p_i M[,2] -> e_i : n = \prod p_i^e_i
+   r = matsize(M)[1]; \\ nb de lignes = nb de p_i
+   x = vector(r); \\ vecteur des x modulo p_i^e_i pour i de 1 à r avec x tq h=g^x
+   for(i=1,r,
+      pi = M[i,1];
+      ei = M[i,2];
+      gg = g^(n/pi);
+      hh = h^(n/pi);
+      a = vector(ei); \\ vecteur des x modulo p_i^j avec j de 1 à e_i
+      f = 1;
+      a[1] = naif(p,pi,gg,hh); \\ Calcul de x modulo p_i
+      x[i] = a[1];
+      for(j=1,ei-1,
+	 f=f*g^(a[j]*pi^(j-1));
+	 hh=(h/f)^(n/pi^(j+1));
+	 a[j+1] = naif(p,pi,gg,hh);
+	 x[i] = x[i] + a[j+1]*pi^j;
+      );
+    );
+   return(vector(r,i,Mod(x[i],M[i,1]^M[i,2]))) 
+};
+
+
+print("\n Exercice 5\n")
+
+
+p = randomprime(2^20)
+g = znprimroot(p);
+n = p -1;
+x = random(n);
+print("Avec p = ",p)
+print("générateur de Z/pZ : ",g)
+print("D'ordre p-1 qui se factorise ainsi :")
+print(factor(n))
+print("On cherche ",x);
+h = g^x;
+xx = PohligHellman(p,n,g,h);
+print("Pohlig-Hellman trouve ",xx);
+print("Qui correspond par restes chinois à ",lift(chinese(xx)));
+
+print("\n Corps fini : F_(p^2) \n");
+
+print("p = ",p);
+P = ffinit(p,2,X) \\ Défini F_{p^2} = F_p[X]/P(X)
+a = ffgen(P); \\ a = X mod P(X), les éléments de F_{p^2} sont les x0 +x1*a avec x0 et x1 dans F_p 
+g = ffprimroot(a); \\ racine primitive : g d'ordre p^2-1
+print("Racine primitive de F_p^2 : ",g);
+print("D'ordre p^2-1 :", p^2 - 1 == fforder(g));
+print("p^2-1 se factorise ainsi :")
+n = p^2 - 1;
+print(factor(n));
+
+print("Attention ffgen ne retourne pas forcément une racine primitive. Ici a est  d'ordre ",fforder(a), " et p^2-1 = ", p^2-1);
+
+x = random(n);
+print("On cherche ",x);
+h = g^x;
+xx = PohligHellman(p,n,g,h);
+print("Pohlig-Hellman trouve ",xx);
+print("Qui correspond par restes chinois à ",lift(chinese(xx)));
+print("Avec la méthode de Pari, on trouve ",fflog(h,g));
+
+\\ Pas d'adaptation nécessaire pour PohligHellman et l'algo naif
+\\ Pour BSGS et Pollard, il faut adapter la représentation des éléments de g (ici vu comme des entiers par lift.
+\\ Pour BSGS, c'est utilisé pour la comparaison pour le tri
+\\ Pour Pollard, c'est utilisé pour faire la partition 
+\\ Une manière de faire, et de représenter l'élement X=x0+x1*a du corps fini par l'entier x0+x1*p par : P = X.pol; val = polcoeff(P,1)*p+polcoeff(P,0); (à la place de val = lift(X) dans le cas de X dans Z/pZ)
+
+
+
+  
