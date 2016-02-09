@@ -1,13 +1,71 @@
-// TD4: ECDSA
+\\ TD4: ECDSA
 
 p = 115792089210356248762697446949407573530086143415290314195533631308867097853951
 
 b = 41058363725152142129326129780047268409114441015993725554835256314039467401291
 
-// Exercice 1
+\\ Exercice 1
 
-n = 115792089210356248762697446949407573529996955224135760342422259061068512044369
+\\ n = 115792089210356248762697446949407573529996955224135760342422259061068512044369
 
-// Initialise la courbe y^2 = x^3 - 3x + b
-ellinit([-3, b], p)
+\\ Initialise la courbe y^2 = x^3 - 3x + b
+E = ellinit([-3, b], p)
 
+\\ On retrouve n en faisant:
+n = ellgroup(E)[1]
+\\ [1] est la pour que n ne soit pas un tableau contenant un seul élément.
+
+
+\\ Exercice 2
+x = 48439561293906451759052585252797914202762949526041747995844080717082404635286
+
+y = 36134250956749795798585127919587881956611106672985015071877198253568414405109
+
+\\ P est-il un point de la courbe ?
+P = [Mod(x, p),Mod(y, p)]
+
+\\ Retourne 1 si P appartient à la courbe E
+ellisoncurve(E, P)
+
+\\ Implémentation de l'algorithme double and add
+doubleAndAdd(E, P, n) = {
+	my (Q = [0], D = Vecrev(binary(n)));
+
+	for (i = 1, length(D),
+	    if (D[i] == 1, Q = elladd(E, P, Q););
+	    P = elladd(E, P, P);
+	    );
+	return (Q);
+}
+
+doubleAndAdd(E, P, n)
+
+\\ Exercice 3
+\\ Simuler un échange de clef par Diffie-Hellman
+
+\\ Comme dans le cours mais g^a sera en fait a*P
+
+diffieHellman(E, P) = {
+	my (n = ellgroup(E)[1],X, Y, ZA, ZB);
+	
+	/* Alice */
+	a = random(n);
+	X = doubleAndAdd(E, P, a);
+	
+	/* Bob */
+	b = random(n);
+	Y = doubleAndAdd(E, P, b);
+
+	ZA = doubleAndAdd(E, Y, a);
+	ZB = doubleAndAdd(E, X, b);
+
+	return (ZA == ZB);
+}
+
+diffieHellman(E, P)
+
+\\ Exercice 4
+hash(x)=
+{
+return(extern("python -c \"import hashlib;print(int(hashlib.sha256('"x"').hexdigest(),16))\""))
+}
