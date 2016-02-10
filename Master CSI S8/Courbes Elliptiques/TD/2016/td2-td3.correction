@@ -38,9 +38,8 @@
 >poldisc(x^3 + a*x + b)
 -4*a^3 - 27*b^2
 
-Correction du prof :
 
-
+/* Correction du prof: */
 
 /* Exercice 1.1 */
 P=x^3-1;
@@ -59,6 +58,7 @@ g= y*(1+t^2)^3 - (8*t^2*(1-t^2)^2)
 polresultant(f,g,t)
 
 /* Exercice 1.4 */
+/* Calcul du discriminant d'un polynôme: */
 poldisc(x^3+a*x+b)
 
 /* Exercice 2.1 */
@@ -113,7 +113,7 @@ myelladd(E,P,Q) = {
 
 /* Exercice 2.3 */
 ellisoncurve(E,P)
-elmul(E,P,n)
+elmull(E,P,n)
 
 /* Exercice 2.4 */
 ellpuissance(E,P,n) =

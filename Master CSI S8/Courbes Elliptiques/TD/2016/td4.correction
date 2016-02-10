@@ -1,8 +1,8 @@
-# TD3: Le logarithme discret
+/* TD3: Le logarithme discret */
 
-##Question 1
+/* Question 1 */
 
-* Prend en paramètre k et renvoie (p, q, g) tel que q soit un nombre premier de k bits et p un premier tels que p - 1 = 2q et g un élément de (Z/pZ)* d'ordre q
+/* Prend en paramètre k et renvoie (p, q, g) tel que q soit un nombre premier de k bits et p un premier tels que p - 1 = 2q et g un élément de (Z/pZ)* d'ordre q */
 
 function1(k) = {
 	     my (p = 0, q = 0, g = 0, G);
@@ -21,13 +21,19 @@ logDiscretNaive(h,g) = {
 		     return (x); 
 }
 
-* On fait function1(k) et on récupère g. On génère h = g^i avec i un nombre aléatoire, puis on lace la fonction:
-* logDiscretNaive(h, g)
-> logDiscretNaive(1487815647197611695910312681741273570332356717154798949898498305086387315423300999654757561928633305897036801, 49)
-=64
-* ie: ici on a 49^64
-## Baby Step/ Giant Step
-* Version avec une recherche dans la liste en O(n)
+/* On fait function1(k) et on récupère g. On génère h = g^i avec i un nombre aléatoire, puis on lace la fonction:
+ * logDiscretNaive(h, g)
+ */
+ 
+logDiscretNaive(1487815647197611695910312681741273570332356717154798949898498305086387315423300999654757561928633305897036801, 49)
+
+/*=64 
+ * ie: ici on a 49^64
+ */
+
+/* Baby Step/ Giant Step:
+ * Version avec une recherche dans la liste en O(n)
+ */
 babyStep(n, a, b) = {
 	    my (m = floor(sqrt(n)) + 1, y = b, in = 1 / a^(m));
 	    t=[];
@@ -44,8 +50,7 @@ babyStep(n, a, b) = {
 		);
 }
 
-*Version avec une recherche en O(log(n)) car la liste est triée. On fait une rechercher dichotomique
-
+/* Version avec une recherche en O(log(n)) car la liste est triée. On fait une rechercher dichotomique */
 
 babyStep2(n, a, b) = {
 	    my (m = floor(sqrt(n)) + 1, y = b, in = 1 / a^(m));
@@ -63,7 +68,7 @@ babyStep2(n, a, b) = {
 		);
 }
 
-* Version de Simon inspirée du cours
+/* Version de Simon inspirée du cours */
 babyGiant2(h, g, p, q) = {
 	      my(m, L, M, tmp);
 	      m = floor(sqrt(q)) + 1;
@@ -91,5 +96,3 @@ babyGiant2(h, g, p, q) = {
 		  );
 return (-1);
 }
-		
-	    	
