@@ -69,3 +69,104 @@ hash(x)=
 {
 return(extern("python -c \"import hashlib;print(int(hashlib.sha256('"x"').hexdigest(),16))\""))
 }
+
+
+
+\\ Correction du prof
+/* Astuce du jour : Pour enlever break dans gp, mettre breakloop=0 dans ~/.gprc */
+
+p = 115792089210356248762697446949407573530086143415290314195533631308867097853951;
+b = 41058363725152142129326129780047268409114441015993725554835256314039467401291;
+
+E=ellinit([Mod(-3,p),Mod(b,p)]);
+print("p premier : ",isprime(p));
+print("nb bits de p : ",length(binary(p)));
+n = E.no 
+print("nb de points : ",n)
+print("n premier : ", isprime(n));
+print n == 115792089210356248762697446949407573529996955224135760342422259061068512044369;
+ P=[Mod(48439561293906451759052585252797914202762949526041747995844080717082404635286,p),Mod(36134250956749795798585127919587881956611106672985015071877198253568414405109,p)];
+[x,y] = P;
+print("P sur la courbe : ",y^2 == x^3 - 3*x + b);
+/*print(ellmul(E,P,n)); */
+
+double(E,P)=
+{
+   my(tmp,a,b,y2,x2,y1,x1);
+   [x1,y1] = P;
+   a = E.a4; b = E.a6;
+   if((P == [0])||(y1==0), return([0]));
+   tmp = (3*x1^2+a)/(2*y1);
+   x3 = tmp^2 - 2 * x1;
+   y3 = tmp *(x1- x3) - y1;
+   return([x3,y3]);
+};
+
+add(E,P,Q)=
+{
+   my(tmp,a,b,y3,x3,y2,x2,y1,x1);
+   [x1,y1] = P;
+   [x2,y2] = Q;
+   a = E.a4; b = E.a6;
+   if(P==Q,return(double(E,P)));
+   if((x1==x2)&&(y1=-y2),return([0]));
+   if(P=[0],return(Q));
+   if(Q=[0],return(P));
+   tmp = (y2-y1)/(x2-x1);
+   x3 = tmp^2 - x1 -x2;
+   y3 = tmp * (x1-x3)-y1;
+   return([x3,y3]);
+}
+
+double_add(E,P,k)=
+{
+   my(d,l,Q);
+   d = binary(k);
+   l = length(d);
+   if((P == [0])||(k == 0),return([0]));
+   if(k==1,return(P));
+   Q = P;
+   for(i=2,l,
+      Q = double(E,Q); /*elladd(E,Q,Q) */
+      if(d[i], Q = add(E,Q,P));
+   );
+   return(Q);
+};
+
+print("nP = ",double_add(E,P,n));
+
+
+/* ECDH */
+a = random(n);
+b = random(n);
+A = double_add(E,P,a);
+B = double_add(E,P,b);
+Z = double_add(E,A,b);
+print(Z == double_add(E,B,a));
+
+/* retourne le hachÃ© par sha256, transformÃ© en entier de 256 bits */
+hash(x)=
+{
+return(extern("python -c \"import hashlib;print(int(hashlib.sha256('"x"').hexdigest(),16))\""))
+} 
+
+
+/* ECDSA */
+a= random(n-2)+1; /* sk 0 < x < n-1*/ 
+Q = double_add(E,P,a); /* pk */
+
+m = "message Ã  signer aa";
+{
+s = 0;
+while(s==0,
+      xr = 0;
+      while(xr==0,r = random(n-2)+1;R = double_add(E,P,r);xr=lift(R[1])%n);
+      s = lift(Mod(r,n)^(-1) * (Mod(hash(m),n) + Mod(a,n)*Mod(xr,n)));
+      );
+signature = [xr,s];
+}	 
+
+u1 = lift(Mod(hash(m),n) * Mod(signature[2],n)^(-1));
+u2 = lift(Mod(signature[1],n) * Mod(signature[2],n)^(-1));
+[x1, y1] = add(E,double_add(E,P,u1),double_add(E,Q,u2));
+if(signature[1] == (lift(x1)%n), print("signature valide"), print("signature non valide"));
