@@ -3,12 +3,12 @@
 Site Web http://mastercsi.labri.fr/ <br />
 
 Ce dépôt rassemble les différents cours et examens des années précédentes pour le Master CSI. Ce dépot essaye avant tout de vous apporter une aide dans vos futures révisions, n'hésitez pas à participer pour les futurs éléves. 
-Nous vous souhatons de bonnes révisions ! 
+Nous vous souhaitons de bonnes révisions ! 
 
 ### Participer 
 
 Vous voulez ajouter un examen ? un cours ? une matière ? ou simplement faire une correction.
-Il suffit pour cela de faire un clone du projet, ajouter les fichiers et proposer un pull-request.
+Il suffit pour cela de faire un clone du projet, ajouter les fichiers et proposer un pull-request ou envoyer un mail ;)
 Voici un tutoriel explicatif pour le pull-request : https://help.github.com/articles/creating-a-pull-request/
 
 Si vous souhaitez participer dans le temps et pas simplement occasionnellement, vous pouvez aussi directement me [contacter](https://github.com/mpgn) pour devenir admin du dépot et ajouter directement vos fichiers. 
