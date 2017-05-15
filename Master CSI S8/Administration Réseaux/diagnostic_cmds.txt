@@ -1,0 +1,156 @@
+# Login
+root
+poweroff
+reboot
+
+### ALIAS PRATIQUES ###
+
+# ips			(Lisibilité des adresses IP des interfaces améliorée)
+alias ips='ifconfig | grep -A 1 eth.: | grep --color=auto -e eth.: -e "inet .*\..*\..*\..*n"'
+
+## Alias utiles au debug d'un réseau ##
+
+# flush_arp
+alias flush_arp='
+ip -s -s neigh flush all
+'
+# clear_policies	(Clear iptables policies)
+alias clear_policies='iptables -P INPUT ACCEPT; iptables -P FORWARD ACCEPT; iptables -P OUTPUT ACCEPT'
+
+# clear_nat		(Clear iptables nat policies)
+alias clear_nat='iptables -t nat -P PREROUTING ACCEPT; iptables -t nat -P POSTROUTING ACCEPT; iptables -t nat -P INPUT ACCEPT; iptables -P OUTPUT ACCEPT'
+
+# hail_mary		(à utiliser si à la fin ça ne marche toujours pas)
+alias hail_mary='flush_arp; clear_policies; clear_nat; echo 1 > /proc/sys/net/ipv4/ip_forward'
+iptables -t nat -L; iptables -L 
+
+# status		(Récapitulatif de la configuration de la machine)
+alias iptables_check='iptables -t nat -L; iptables -L | grep --color=auto -e DROP -e REJECT'
+alias forwarding_check='(echo -n "Forwarding = "; cat /proc/sys/net/ipv4/ip_forward) | grep --color=auto -e 0 -e " "'
+alias status='clear; arp -n; iptables_check; forwarding_check; ips; route'
+status
+
+# ethers		(ARP debug)
+alias ethers='clear; ifconfig | grep -A 4 eth.: | grep --color=auto -e eth.: -e ether; arp -n'
+
+arp -d @IP	# (Pour supprimer une entrée en particulier de la table)
+
+### CONFIGURATION ###
+
+## Configurer interfaces réseau ##
+nano /etc/network/interfaces
+	# DHCP
+	auto ethX
+	iface ethX inet dhcp
+	
+	# Statique (en TP c'est celui-là plutôt)
+	iface ethX inet static
+		address _______/__
+		[gateway ______]
+
+# (la ligne gateway évite de devoir (se) taper 'route add default gw ____ ethX') 
+		
+# Appliquer les changements (Redémarrer le service networking)
+/etc/init.d/networking restart
+
+
+## COMMANDES DE MODIFICATION DIRECTE (e.g. pour un script) ##
+
+# Ajouter une passerelle par défaut (ligne gateway de /etc/network/interfaces)
+route add default gw @GW ethX
+
+# La supprimer
+route del default
+
+# Changer l'adresse ip d'une interface (/etc/network/interfaces)
+ifconfig ethX @IP/MASK [up]
+
+# Ajouter / Supprimer une route
+route (add/del) -net @IP/MASK gw @GW dev ethX
+
+# Mode passerelle (éphémère)
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+# Mode passerelle (persistant)
+echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf && sysctl -p
+
+## IPtables / NAT ##
+# Autoriser (ACCEPT) traffic en INPUT, OUTPUT ou FORWARD (e.g. OUTPUT)
+iptables -P OUTPUT ACCEPT
+
+# Lister les filtres
+iptables -L 
+
+# Lister les filtres NAT
+iptables -t nat -L
+
+# NAT Statique
+iptables -t nat -A POSTROUTING -s @private_host -j SNAT --to-source @iface [-o ethout]
+iptables -t nat -A PREROUTING -d @iface -j DNAT --to-destination @private_host [-i ethin]
+
+# NAT sur une plage / sous-réseau (le plus pratique en fait)
+iptables -t nat -A POSTROUTING -s @priv/mask -j MASQUERADE
+
+
+### VLANs ###
+
+## Dupliquer virtuellement une interface (chez la passerelle) ##
+# (Ne pas oublier d'activer le mode passerelle!)
+
+# Possibilité 1 (persistante)
+nano /etc/network/interfaces
+	ifconfig ethX.100 ...
+
+	ifconfig ethX.200 ...
+
+# Possiblité 2 (commandes)
+ifconfig ethX up
+vconfig add ethX 100
+vconfig add ethX 200
+ifconfig ethX.100 ...
+
+## Configurer le switch
+# Créer les VLANs
+vlan/create 100
+vlan/create 200
+
+# Associer le port Y (celui qui mène à la passerelle) aux VLANs (mode tagged)
+vlan/addport 100 Y
+vlan/addport 200 Y
+
+# Associer les autres ports (e.g. 3) à leurs VLANs respectives (e.g. 100) (mode untagged)
+port/setvlan 3 100
+
+# Remarque: Lien trunk entre deux switch =>
+# vlan/addport sur le port de chaque switch le reliant à l'autre switch (et les 2 VLANs)
+
+### ETUDIER LE TRAFFIC ###
+
+# Logger le trafic réseau de ethX ('any' pour toutes les interfaces)
+# root@immortal#:
+tcpdump -n -i ethX -w /mnt/host/toto
+
+# Le lire dans une interface graphique (sur la machine hôte.)
+wireshark ~/AR-QEMU-SESSION/immortal/toto
+
+## NMAP - Tester les ports ##
+# Plage d'@IP: 192.168.0.1-10
+# Plage de ports: -p 50-40000
+# Énumérer les ports: -p 80,8080
+
+# Syn scan (celui par défaut)
+nmap [-sS] [-p ports] @IP
+
+# Ping (ICMP) scan
+nmap -sP @IP
+
+# XMas scan
+nmap -sX [-p ports] @IP
+
+# Traceroute
+nmap --traceroute @IP
+traceroute -T 192.168.0.1      # option -T pour faire du TCP plutôt que de l'UDP
+
+### BONUS ###
+# Ajouter un nom d'hôte (nommer une adresse)
+echo "@IP NOMHOTE" >> /etc/hosts
