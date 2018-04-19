@@ -19,6 +19,14 @@ Sinon, la PLT va chercher l'adresse de la fonction dans les librairies partagée
 _remarque_ : À chaque fois que les librairies ne sont pas compilées en statique, on aura besoin de PLT/GOT.
 
 
+## Attaques
+
+  * buffer overflow
+  * ret2libc
+  * ret2plt
+  * rop
+
+
 ## Protections
 
   * NX
@@ -34,6 +42,7 @@ _remarque_ : À chaque fois que les librairies ne sont pas compilées en statiqu
 ---                   | ---          | ---
 adresses              | 4 octets     | 8 octets
 passage de paramètres | sur la stack | dans les registres (rdi, rsi, rdx, rcx, r8, r9) puis sur la stack
+appels système        | int 80h      | syscall
 
 
 #### Syscalls
@@ -59,6 +68,18 @@ RAX  | Name       | RDI                      | RSI         | RDX
 0x3c | sys_exit   | int                      | ---         | ---
 
 Return values are set into RAX.
+
+
+# ASM
+
+---              | Intel                          | AT&T
+---              | ---                            | ---
+register         | eax                            | %eax
+value            | 1                              | $1
+instruction      | instr dest,source              | instr source,dest
+pointed address  | [eax]                          | (%eax)
+memory operand   | segreg:[base+index*scale+disp] | %segreg:disp(base,index,scale)
+
 
 
 ## Divers
