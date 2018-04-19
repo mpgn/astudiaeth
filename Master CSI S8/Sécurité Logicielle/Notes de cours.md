@@ -31,7 +31,7 @@ _remarque_ : À chaque fois que les librairies ne sont pas compilées en statiqu
 ## x86 vs x86_64
 
 ---                   | x86          | x86_64
----                   |              |
+---                   | ---          | ---
 adresses              | 4 octets     | 8 octets
 passage de paramètres | sur la stack | dans les registres (rdi, rsi, rdx, rcx, r8, r9) puis sur la stack
 
@@ -41,7 +41,7 @@ passage de paramètres | sur la stack | dans les registres (rdi, rsi, rdx, rcx, 
 #### x86
 
 EAX  | Name       | EBX                      | ECX         | EDX
----  |            |                          |             |
+---  | ---        | ---                      | ---         | ---
 0x01 | sys_exit   | int                      | ---         | ---
 0x03 | sys_read   | unsigned int char*       | size_t      | ---
 0x04 | sys_write  | unsigned int const char* | size_t      | ---
@@ -52,7 +52,7 @@ Return values are set into EAX.
 #### x86_64
 
 RAX  | Name       | RDI                      | RSI         | RDX
----  |            |                          |             |
+---  | ---        | ---                      | ---         | ---
 0x00 | sys_read   | unsigned int char*       | size_t      | ---
 0x01 | sys_write  | unsigned int const char* | size_t      | ---
 0x3b | sys_execve | const char* filename     | char** argv | char** envp
