@@ -34,6 +34,8 @@ _remarque_ : À chaque fois que les librairies ne sont pas compilées en statiqu
     - **ret2libc** (bcp plus dur si ASLR activé)
     - **ret2plt** (Full Relro empêche d'écrire sur la got)
     - **rop** (Return-Oriented Programming, plus dur si ASLR est activé et si le code est compilé en PIE)
+    - **blind rop** si ASLR est activée, on aura du mal pour trouver les gadgets. Donc on implement brop. Si le serveur crash mais il ne fait pas la randomisation on peut: 1. lire la stack et faire un leak des canaries et l'address de retour, 2. trouver des gadgets (temps execution) pour faire un write 3. faire un dump du binaire pour trouver gadgets pour executer un shellcode. (en utilisant le write)
+    
   * **format string**
     - permet d'écrire sur n'importe qu'elle adresse (qui le permet..)
     - permet de leaker des infos sur la mémoire
