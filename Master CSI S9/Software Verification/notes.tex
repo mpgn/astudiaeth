@@ -2,6 +2,9 @@
 
 \usepackage{amsmath}
 \usepackage[utf8]{inputenc}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{float}
 
 \begin{document}
   \section{SAT}
@@ -26,9 +29,59 @@
   \subsection{}
 
   \section{Range Analysis}
-  \subsection{Round Robin}
-  \subsection{Widening}
-  \subsection{Narrowing}
+    \subsection{Round Robin}
+    \begin{algorithm}
+    \begin{algorithmic}
+      \FORALL{$q \in Q$}
+        \STATE{$a[q] \leftarrow \bot$}
+      \ENDFOR
+      \STATE{$a[q_{in}] \leftarrow \top$}
+
+			\WHILE{$changed \neq false$}
+			  \STATE{$changed = false$}
+				\FORALL{$q \in Q$}
+			    \STATE{$new \leftarrow \sqcup_{p \xrightarrow{op} q} t^{\#}_{op}(a[p])$}
+					\IF{$new \not\sqsubseteq a[q]$}
+						\STATE{$a[q] \leftarrow a[q] \sqcup new$}
+						\STATE{$changed \leftarrow true$}
+					\ENDIF
+				\ENDFOR
+      \ENDWHILE
+    \end{algorithmic}
+    \end{algorithm}
+
+    \subsection{Widening $\bigtriangledown$}
+		\begin{algorithm}[H]
+    \begin{algorithmic}
+      \IF{$new \not\sqsubseteq a[q]$}
+        \STATE{$a[q] \leftarrow a[q] \bigtriangledown new$}
+			\ENDIF
+    \end{algorithmic}
+		\end{algorithm}
+
+		\paragraph{} Quelques exemples de Widening (en tenant seulement compte des deux derniers éléments de la séquence)
+    \begin{align*}
+      \ldots, (1, 2), (1, 3), (1, 4) \rightarrow (1, +\infty) \\
+      \ldots, (1, 2), (-1, 2), (-6, 2) \rightarrow (-\infty, 2) \\
+      \ldots, (1, 2), (-9, 3), (-19, 4) \rightarrow (-\infty, +\infty) \\
+      \ldots, (1, +\infty), (-9, +\infty), (-19, +\infty) \rightarrow (-\infty, +\infty)
+    \end{align*}
+
+    \subsection{Narrowing $\bigtriangleup$}
+		\begin{algorithm}[H]
+    \begin{algorithmic}
+      \IF{$new \not\sqsupseteq a[q]$}
+        \STATE{$a[q] \leftarrow a[q] \bigtriangleup new$}
+      \ENDIF
+    \end{algorithmic}
+		\end{algorithm}
+
+		\paragraph{} Quelques exemples de Narrowing
+    \begin{align*}
+      (1, +\infty) \bigtriangleup (1, 4) &= (1, 4) \\
+			(1, 10) \bigtriangleup (1, 4) &= (1, 10) \\
+			(-\infty, 10) \bigtriangleup (1, 4) &= (1, 10)
+    \end{align*}
 
   \section{Réseaux de Pétri}
 \end{document}
