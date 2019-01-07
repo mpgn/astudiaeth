@@ -1,8 +1,26 @@
 \documentclass{article}
 
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+
 \begin{document}
   \section{SAT}
-  \subsection{CNF DNF}
+  \subsection{CNF}
+  \paragraph{}
+    Conjunctive Normal Form : conjonction (ET) de clauses (disjonction de littéraux).
+    \begin{align*}
+      c_0 \land c_1 \land ... \\
+      \text{où, } \forall i, c_i = x_0 \lor x_1 \lor \ldots
+    \end{align*}
+
+  \subsection{DNF}
+  \paragraph{}
+    Disjunctive Normal Form : disjonction (OU) de clauses (conjonction de littéraux).
+    \begin{align*}
+      c_0 \lor c_1 \lor ... \\
+      \text{où, } \forall i, c_i = x_0 \land x_1 \land \ldots
+    \end{align*}
+
 
   \section{Connexion de Galois}
   \subsection{}
