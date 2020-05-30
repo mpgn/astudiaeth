@@ -1,0 +1,46 @@
+Exercice 6:
+1.
+On souhaite donc montrer que si (e,y) est valide, on a bien h(M||x)=h(M||v).
+Commme c'est une fonction de hachage, les collisions sont supposées rares.
+On doit donc avoir M||x = M||v et donc x=v.
+Tout ce qu'on sait de x c'est x=r² mod n.
+On a  v = u^e * y² mod n
+	= s^(-2e) * r² * s^(2e) mod n.
+	= r² mod n.
+On a bien v=x et donc e'=e.
+
+2.
+On essaie de donner un triplet (M,e,y) valide sans connaître s.
+Commençons par voir notre marge de manoeuvre
+
+On connaît 	n = pq (sans connaître p et q)
+		u = s^(-2) mod n (sans connaître s)
+
+Normalement on choisit r au hasard mais on est pas obligé.
+Cependant on voit que dans la vérification e'=e,
+le r ne pose pas de problème.
+
+Voyons les difficultés quand on ne connaît pas (p,q,s).
+Le seul point délicat est la construction de y car elle fait intervenir s.
+
+Utilisons donc l'hypothèse que h renvoie un nombre pair avec probabilité 1/2.
+e sera donc pair avec probabilité 1/2 et e' aussi.
+Cela ne permet pas de faire n'importe quoi et d'espérer que e=e' puisqu'en fait
+ça ne limite pas les valeurs de e et de e'.
+
+e' n'intervient qu'à la fin, on s'intéresse donc à e.
+C'est la puissance à laquelle intervient s dans y.
+On choisit r au hasard et on a ainsi une chance sur 2 pour que e soit paire.
+On imagine donc qu'on a fait quelques tirages de r pour que cela arrive.
+e est paire et on veut calculer y = r*s^e mod n
+Mais justement on connaît u = s^(-2) mod n.
+Comme s est inversible modulo n, s^(-2) l'est aussi,
+et on peut donc calculer (s^(-2))^(-1)=s² mod n par une identité de bézout entre u et n.
+On peut maintenant calculer e/2 et construire y correctement en calculant y = r*(s²)^(e/2).
+
+On voit qu'on a pu choisir le message M qu'on voulait,
+donc on peut vraiment envoyer ce qu'on veut de manière certifiée.
+
+(Dans le cas m=1 on aurait eu h renvoyant 0 ou 1.	)
+(Donc après quelques tirages de r, e=0.			)
+(Donc en fait s^e=1 et donc on se fiche de connaître s. )

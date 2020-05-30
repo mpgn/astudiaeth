@@ -1,0 +1,55 @@
+Essayez d'aborder chaque question tout seul après avoir compris la précédente.
+En essayant de trouver de plus en plus les bonnes traductions des hypothèses.
+Bon courage !
+
+Exercice 2:
+1.a.
+Les solutions de x^10000=1 sont inversibles.
+On va utiliser la structure de groupe cyclique de (Z/lZ)*.
+La définition même de groupe cyclique est l'existence d'un élément générateur.
+Soit g un générateur de (Z/lZ)*.
+Pour tout x dans (Z/lZ)*, il existe un unique entier k dans {0,1,...,l-2} tel que x = g^k.
+On a alors les équivalences suivantes :
+x^10000=1 <=> g^(k*10000)=1 <=> ordre(g) | k*10000 <=> l-1 | k*10000
+
+Il y a donc autant de solutions que d'entiers k dans {0,1,...,l-2} vérifiant l-1 | k*10000.
+Nous allons compter ceux-ci.
+
+Traduisons l'hypothèse l=1 mod 10000:
+On a 10000 | l-1 donc l-1=q*10000 pour un certain entier q.
+On a alors, l-1 divise k*10000 <=> k est un multiple de q.
+
+Essayons de voir quels sont les valeurs de k possibles.
+C'est-à-dire à la fois dans {0,1,...,l-2} et multiple de q.
+On cherche donc l'ensemble des entiers m avec :
+0 <= m*q < l-1
+On a q=(l-1)/10000 donc cela donne 0 <= m*(l-1)/10000 < l-1 et donc 0 <= m/10000 < 1 ou encore 0 <= m < 10000.
+Cela fait bien 10000 éléments.
+
+On voit bien qu'on peut trouver la solution de manière automatique à condition de trouver les bonnes traductions des hypothèses.
+
+Pour rendre tout cela plus intuitif, disons que les solutions sont bien sûr 1=g^0, 
+g^((l-1)/10000) qui est déjà plus intéressante mais reste évidente et en fait,
+g^(2(l-1)/10000), g^(3(l-1)/10000), jusqu'à g^(9999(l-1)/10000)
+et on s'arrête ici car g^(10000(l-1)/10000)=g^(l-1)=g^0=1.
+
+1.b.
+Rappelons d'abord que le théorème des restes chinois dit exactement la chose suivante.
+Si n=pq avec p et q premier entre eux,
+alors pour tous x,y entiers, on a
+x=y mod n <=> (x=y mod p et x=y mod q).
+Et donne en plus les moyens de fabriquer, pour tous (a mod p) et (b mod q), l'unique élément (x mod n) qui vérifiera x=a mod p et x=b mod q.
+
+Ainsi, M^10000=1 mod n <=> (M^10000=1 mod p et  M^10000=1 mod q).
+Et à tout couple de d'éléments (a mod p) et (b mod q), tel que a^10000=1 mod p et b^10000=1 mod q,
+correspond un unique élément (M mod n) tel que M=a mod p et M=b mod q
+et donc M^10000=1 mod n.
+
+En appliquant la question 1.a. à p et q,
+on voit qu'il y a 10000 éléments (a mod p) et 10000 éléments (b mod q) convenables.
+Il y a donc 10000^2 messages (M mod n) qui vérifient M^10000=1 mod n.
+
+2.
+Comme 10000=(2*5)^4 et que e n'est divisible ni par 2 ni par 5, on a pgcd(10000,e)=1.
+L'algorithme d'euclide étendu permet donc de trouver u,v des entiers tels que u*10000+v*e=1 (Bézout).
+Alors C^v = M^(v*e) = 1*M^(v*e) = M^(u*10000)*M^(v*e) = M.

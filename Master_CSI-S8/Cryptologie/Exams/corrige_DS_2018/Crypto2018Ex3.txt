@@ -1,0 +1,103 @@
+Attention la fin de cet exercice est délicate.
+
+Exercice 3:
+
+Remarque préliminaire : Comme n = pq est une module RSA, p et q sont premiers distincts.
+
+1.
+Notons i:= ordre(a mod p), j:= ordre(a mod q) et k:= ordre(a mod n).
+On veut montrer que ppcm(i,j)=k.
+
+Version courte
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Soit m un entier.
+On a les équivalences suivantes :
+a^m=1 mod n 	<=> 	(a^m=1 mod p et a^m=1 mod q) 	[théorème chinois]
+		<=> 	i|m et j|m			[notion d'ordre]
+		<=> 	ppcm(i,j)|m			[notion de ppcm]
+
+Donc m=ppcm(i,j) est le plus petit entier naturel non nul tel que a^m=1 mod n.
+Et donc ppcm(i,j)=k.
+
+Version tranquille
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Si c'est trop violent, on peut procèder en deux étapes.
+(*) On montre d'abord que ppcm(i,j)|k, c'est-à-dire que i|k et j|k.
+(**) On montre ensuite que k|ppcm(i,j).
+
+Voici (*).
+On veut montrer que i|k et j|k, ce qui équivaut à a^k=1 mod p et a^k=1 mod q).
+Or a^k=1 mod n et donc par le théorème chinois, (a^k=1 mod p et a^k=1 mod q).
+
+Voici (**).
+On veut montrer que k|ppcm(i,j), ce qui équivaut à a^ppcm(i,j)=1 mod n,
+ce qui équivaut à a^ppcm(i,j)=1 mod p et a^ppcm(i,j)=1 mod q par le théorème chinois.
+C'est évident car a^i=1 mod p et a^j = 1 mod q.
+
+2.
+On a phi(n) = phi(p)*phi(q) = (p-1)(q-1).
+Donc phi(n)/d = ppcm(p-1,q-1).
+
+D'après la question 1., il suffit donc de trouver a avec ordre(a mod p)=p-1 et ordre(a mod q)=q-1.
+
+Soient (g mod p) un générateur de Z/pZ et (h mod q) un générateur de Z/qZ.
+Alors par le théorème chinois, il existe (a mod n) tel que (a=g mod p et a=h mod q).
+On a donc bien ordre(a mod p)=ordre(g mod p)=p-1 et ordre(a mod q)=ordre(h mod p)=q-1.
+
+3.a.
+Comme G est engendré par (a mod n), G est un groupe cyclique.
+L'énoncé fait l'hypothèse d=2 et donc ordre(a mod n) = |G| = phi(n)/2.
+
+L'oracle retourne l'unique entier r dans {0,..,phi(n)/2-1} tel que b = a^r mod n.
+Cet entier r est le reste dans la division de n par phi(n)/2.
+Or l'indication dit que n < 3*phi(n)/2 (on l'admet dans un premier temps)
+On en déduit que l'oracle peut retourner :
+soit n-0*phi(n)/2	si phi(n)/2 > n,
+soit n-1*phi(n)/2 	si phi(n) > n >= phi(n)/2,
+soit n-2*phi(n)/2 	si n >= phi(n).
+
+
+Mais bien sûr n >= phi(n).
+Donc l'oracle retourne n-2*phi(n)/2 = n-phi(n).
+
+Montrons que 2*n < 3*phi(n).
+On a,
+2*n < 3*phi(n)	<=>	2*pq < 3(p-1)(q-1)
+		<=>	2*pq < 3(pq-p-q+1)
+		<=>	pq-3(p+q)+3 > 0
+
+On peut penser utiliser l'hypothèse p,q > 3 pour écrire pq >= 4q.
+Cependant on s'apperçoit que cette minoration n'est pas suffisante et il faut faire plus fin.
+Supposons q > p quitte à inverser leurs rôles.
+Comme p > 3, on a p >= 5 et donc q >= 7 car p et q sont premiers distincts.
+On ne peut pas faire mieux car pour p=5 et q=7, on a bien pgcd(p-1,q-1)=2.
+
+Cela n'est pas facile et il faut expérimenter un peu.
+Etudions donc le cas limite p=5, q=7.
+Vérifions notre inégalité dans ce cas :
+5*7-3(5+7)+3 = 35-15-21+3 = -1+3 > 0
+On voit bien que la stricte positivité est obtenue de justesse grace au 3.
+
+Si p>=6, alors pq >= 6q >= 3p+3q et on a l'inégalité souhaitée facilement.
+
+Si p=5, alors on a seulement p*q=3*q+2*q
+et donc p*q-3(p+q)+3 = 2*q-3*5+3 = 2*q-12.
+Mais q >= 7 et donc 2*q-12 > 0.
+
+3.b. 
+On obtient donc r=n-phi(n) et on en déduit phi(n)=n-r.
+Cela nous permet déjà de déchiffrer tous les messages cryptés. Ce n'est déjà pas mal!
+Factoriser n=pq à partir de phi(n) est une technique du cours :
+On connaît en effet n=pq et n-phi(n)=p+q-1.
+On peut donc former un système en p et q :
+L1|pq=n
+  |et
+L2|p+q=n-phi(n)+1
+
+On peut chercher à éliminer q en faisant p*L2-L1.
+Cela donne a droite p²+pq-pq et donc bien p²,
+et à gauche p*n-p*phi(n)+p-n.
+
+On a donc p²-p*(n-phi(n)+1)-n=0
+C'est un polynôme de degré 2 en p, on sait trouver les racines
+par la méthode lycéenne.

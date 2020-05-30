@@ -1,0 +1,71 @@
+Exercice 5:
+
+Rappelons d'abord le protocole de signature ElGamal du message M:
+1-Alice choisit au hasard un entier k tel que pgcd(k,p-1)=1.
+2-Elle calcule u=alpha^k mod p.
+3-Elle calcule v=k^(-1)(M-s*u) mod(p-1)
+4-Le message signé est le triplet (M,u,v).
+
+Le processus de vérification est alors le suivant:
+1-Bob teste alors beta^u*u^v == alpha^M mod p.
+En effet, k*v=M-s*u mod(p-1) donc k*v+s*u=M mod(p-1).
+ce sont bien les puissances de alpha obtenue à gauche et à droite du ==.
+
+1.
+L'énoncé nous place donc dans le cas où le message signé est (M,u,0).
+C'est-à-dire v=0 donc k^(-1)(M-s*u)=0 mod(p-1) et donc M=s*u mod(p-1).
+Comme on suppose ici que pgcd(u,p-1)=1, on peut calculer u^(-1) mod(p-1).
+Et obtenir M*u^(-1)=s mod(p-1), c'est-à-dire s.
+
+2.
+La résolution de cette question m'a pris un temps important.
+Ce n'est qu'à force de chercher dans toutes les écritures qui interviennent dans ce processus
+que j'ai trouvé que les écritures utiles étaient... celles de M et M' en fonction de u, v, v' et s!
+
+On se convainc pour les prochaines fois de penser que si on veut trouver une quantité comme s,
+il faut chercher une relation ou s n'apparait pas comme une puissance sinon c'est perdu d'avance !
+
+En effet, on a
+k*v+s*u=M mod(p-1) et k*v'+s*u=M' mod(p-1).
+
+Si on soustrait ces égalités, c'est perdu car on fait disparaître le s.
+l'indication de l'énoncé faisant apparaître u(v-v') on peut penser à faire la combinaison
+vM'-v'M = s*u*(v-v') mod(p-1),
+qui a l'intérêt de faire disparaître les k.
+
+Posons d = pgcd(u(v-v'),p-1).
+L'algorithme d'euclide étendu permet de trouver a, b avec a*u(v-v')+b*(p-1) = d
+On a alors a*(vM'-v'M) = s*d mod(p-1).
+
+Notons r ce reste modulo (p-1) que le calcul nous donne.
+Si d est petit, comme s*d < (p-1)*d,
+on peut chercher la valeur entière de s*d parmi les quelques représentants possibles de (r mod(p-1)),
+c'est-à dire r, r+(p-1), r+2*(p-1), ..., r+(d-1)*(p-1).
+Pour chaque représentant a de (r mod(p-1)), on vérifie si a/pgcd(u(v-v')) est bien s.
+Pour vérifier si on a bien obtenu s, il suffit d'élever alpha à cette puissance et de voir si on obtient bien beta.
+
+3.a.
+On a p-1=148=2^2*37.
+Il suffit donc de calculer (2^(2^2) mod 149) et (2^(2*37) mod 149).
+On vérifiera à l'aide de la calculette que ni l'un ni l'autre ne donne 1.
+Et donc 2 est bien racine primitive modulo p.
+
+3.b.
+On a u(v-v') = 79*(101-25) = 6004 et pgcd(6004,148)=4.
+Ensuite vM'-v'M = 101*56-25*32 = 120 mod 148.
+
+On trouve la relation de Bézout -7*u(v-v')+284(p-1)=4
+et on calcule -7(vM'-v'M)=48 mod 148.
+
+On a donc 0 < s*pgcd(6004,148) < 4*148 et s*pgcd(6004,148) = 48 modulo 148.
+Il y aura donc au plus 3 valeurs à tester.
+48/4=12 mais 2^12 != 66 mod 149.
+(48+148)/4=49, et 2^49 = 66 mod 149.
+On a donc trouvé s=49.
+
+4.
+On voit que v contient s^(-1).
+On écrit donc beta^v = alpha^(M-u*k) mod p.
+Il reste donc à éliminer u*k dans la puissance car k n'est pas connu par celui qui vérifie.
+On a u^u = alpha^(u*k).
+On peut donc vérifier que u^u*beta^v = alpha^M mod p.
