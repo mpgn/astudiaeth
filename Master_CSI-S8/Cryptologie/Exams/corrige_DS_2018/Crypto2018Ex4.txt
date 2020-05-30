@@ -1,0 +1,187 @@
+Exercice 4:
+
+Nous écrirons ici les choses de façons plus abstraite que le (x mod n) car cela allège considérablement les explications.
+
+Commençons par le rappel fondamental suivant :
+Si (A,+,.) et (B,+,.) sont deux anneaux,
+alors on peut former l'ensemble AxB des paires d'éléments (a,b) où a est dans A et b est dans B.
+Et on peut munir AxB d'une structure d'anneau (AxB,+,.),
+où l'addition est l'addition terme à terme, (a,b)+(c,d)=(a+c,b+d)
+et où la multiplication est la multiplication terme à terme, (a,b).(c,d)=(a.c,b.d).
+Les neutres pour l'addition et la multiplication sont alors nécessairement les éléments (0,0) et (1,1) respectivement.
+
+Rappelons maintenant le théorème chinois sous sa forme savante :
+Soient m, n des entiers premiers entre eux.
+Il existe un isomorphisme d'anneau entre (Z/nmZ,+,.) et (Z/nZxZ/mZ,+,.).
+Notons phi cet isomorphisme.
+
+Cela veut dire que phi fait correspondre 1 à 1 les éléments de Z/mnZ et les couples de Z/mZxZ/nZ
+de manière à conserver les opérations entre les éléments de la façon suivante :
+Si phi(x)=(a,b) et phi(y)=(b,c),
+alors phi(x+y) = phi(x)+phi(y) = (a+b,c+d),
+et aussi phi(x.y) = phi(x).phi(y) = (a.b,c.d).
+On alors nécessairement phi(0)=(0,0) et phi(1)=(1,1).
+
+Il ne faut pas oublier la partie constructive du théorème
+qui permet à partir d'un couple d'entiers (a,b)
+de construire un entier x dans {0,mn-1}
+dont la classe (x mod mn) dans Z/mnZ
+est envoyé par phi sur le couple des classes ((a mod m),(b mod n)).
+
+1.
+Plutôt que de prendre x entier premier avec n, on considère x un élément de (Z/nZ)*.
+On suppose que x est un carré.
+
+Soit phi l'ismorphisme d'anneau du théorème chinois entre (Z/nZ,+,.) et (Z/pZxZ/qZ,+,.).
+Soit (x',x'') := phi(x)
+Comme c'est un isomorphisme d'anneau, x est un carré implique que (x',x'') est un carré
+et les racines carrées de x et de (x',x'') sont en bijection.
+De plus, comme x est inversible, (x',x'') est inversible et donc x' et x'' sont inversibles.
+
+(x',x'') est un carré signifie que x' est un carré et x'' est un carré
+et (y',y'') est racine carrée de (x',x'') si et seulement si (y' est racine carrée de x' et y'' est racine de x'').
+
+Montrons que x' admet 2 racines carrées dans Z/pZ.
+Soit y' dans Z/pZ tel que y'²=x.
+Comme x' est inversible, y' est non nul et donc y' et -y' sont distincts car p est impair.
+Ce sont alors deux racines distinctes du polynôme X²-x' dans Z/pZ
+et comme Z/pZ est un corps et que ce polynôme est de degré 2, ce sont les seules.
+Ainsi, x' admet 2 racines carrées y' et -y'.
+
+De même x'' admet 2 racines carrées y'' et -y''.
+
+Les couples (y',y''), (y',-y''), (-y',y'') et (-y',-y'') sont alors les 4 racines carrées distinctes de (x',x'').
+Et donc x admet 4 racines carrées.
+
+2.
+Montrons que sous les mêmes hypothèses, x admet également 4 racines quatrièmes.
+Notons encore (x',x'')=phi(x).
+
+Facilement, x' admet au moins une racine quatrième si et seulement au moins l'une de ses racines carrées est elle-même un carré.
+Montrons alors qu'on a toujours la situation suivante : l'une est un carré et l'autre n'en est pas un.
+
+Nous allons utiliser la caractérisation donnée et démontrée à la fin de cet exercice,
+en Prop 1 et qui est la première à connaître dans ce domaine :
+
+Soit s dans Z/pZ.
+Comme p est premier impair, s est un carré <=> si s^((p-1)/2) = 1.
+Or p=3 mod 4 donc p-1 n'est pas multiple de 4 et donc (p-1)/2 est impair.
+Ainsi, (-s)^((p-1)/2) = -(s^((p-1)/2))
+et donc s^((p-1)/2) = 1 <=> (-s)^((p-1)/2) = -1.
+Autrement dit, s est un carré <=> -s n'est pas un carré.
+
+On voit donc que x' admet exactement deux racines quatrièmes par sa racine carrée qui est elle-même un carré.
+De même pour x''.
+Et donc bien sûr, le couple (x',x'') admet exactement 4 racines 4èmes et il en va de même pour x.
+
+3.a.
+Calculer tous les carrées modulo 23 et tous ceux modulo 47 serait trop long.
+Une méthode moins longue est d'utiliser la caractérisation de la Prop 1
+et de vérifier que 3^11=1 mod 23 et que 3^23=1 mod 47.
+
+Comme 23 et 47 sont des premiers de Blum,
+un méthode encore moins longue est donnée par la Prop 4 et est indispensable pour la dernière question.
+Si (3 mod 23) est un carré, alors (3^(24/4) mod 23) en est une racine.
+Calculons 3^(24/4) = 3^6 = 16 mod 23 et on a bien 16^2 = 3 mod 23.
+De même, 3^(48/4) = 3^12 = 12 mod 47 et on a bien 12^2 = 3 mod 47.
+Ainsi (3 mod 1081) est un carré et on sait en plus que :
+(3 mod 23) admet (16 mod 23) et (7 mod 23) comme racines carrées,
+(3 mod 47) admet (12 mod 47) et (35 mod 47) comme racines carrées,
+
+3.b.
+Voyons maintenant si (16 mod 23) est lui-même un carré.
+C'est évident car 16=4².
+Et voyons si (12 mod 47) est lui-même un carré.
+Aucune des deux racines carrées n'est un carré de manière évidente,
+il faut donc réitérer la méthode de Prop 4.
+Calculons 12^(48/4) = 12^12 = 24 mod 47 et on a bien 24²=12 mod 47.
+
+Dès lors, les 2 racines quatrièmes de (3 mod 23) sont (4 mod 23) et (-4 mod 23)
+et les 2 racines quatrièmes de (3 mod 47) sont (24 mod 47) et (-24 mod 47).
+
+Nous utilisons maintenant la partie constructive du théorème chinois
+pour récupérer les racines quatrièmes de (3 mod 1081).
+On a la relation de Bézout évidente 47-2*23=1.
+L'idée de cette construction est que 
+
+-2*23 = 47-2*23	= 1 mod 47	et 	-2*23 = 0 mod 23 	tandis que 
+
+	47 = 0 mod 47 	   	et 	47 = 47-2*23 = 1 mod 23.
+Cela va jouer le rôle de projecteurs modulo p et modulo q.
+
+Construisons d'abord a tel que a = 4 mod23 et a = 24 mod 47.
+Le nombre a = 4*47-24*2*23 convient.
+En effet, on voit avec ce qui a été dit précédemment que
+a = -24*2*23 = 24*1 mod 47 	et que 	      a = 4*47 = 4*1 mod 23.
+
+Calculons a = -916 = 175 mod 1081.
+Alors (175 mod 1081) et (-175 mod 1081) sont deux racines quatrièmes de (3 mod 1081).
+La seconde est l'antécédant par phi de (-4 mod 23, -24 mod 47).
+Il suffit donc de faire de même pour (4 mod 23, -24 mod 47) par exemple.
+On construit donc l'entier a' = 4*47+24*2*23.
+Calculons a' = 1292 = 211 mod 1081.
+Alors (211 mod 1081) et (-211 mod 1081) sont les deux autres.
+
+Fin de l'exercice.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Pour approfondir sur les carrés, nous proposons un bref rappel de cours.
+Ces propositions ne vont pas de soi et leurs preuves sont faciles.
+Il est donc très intéressant de les connaître.
+
+Soit p un nombre premier impair. Ceci afin que p-1 soit divisible par 2. Si p=2 tout le monde est carré.
+
+0 est toujours un carré dans Z/pZ et on peut ne s'intéresser maintenant qu'aux inversibles.
+
+La Prop 1 est une caractérisation des carrés de (Z/pZ)* 
+fondamentale pour démontrer des propriétés sur les carrés.
+Donnons lui le nom qu'elle mérite : c'est le critère d'Euler.
+On montre ensuite que la moitié des inversibles sont des carrés dans les Prop 2 et Prop 3.
+On montre enfin que dans le cas où p=3 mod 4 (dit de Blum), alors on sait calculer facilement une racine carrée.
+Si ce n'est pas le cas, c'est bien plus compliqué.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 1 (critère d'Euler)
+Soit a dans (Z/pZ)*.
+a est un carré  <=> a^((p-1)/2) = 1
+
+Preuve
+Le sens (=>) est évident, voyons l'autre.
+Soit g un générateur de (Z/pZ)*.
+On a alors a=g^k pour un certain k.
+On a alors g^(k(p-1)/2) = 1  donc p-1=ordre(g)|k(p-1)/2 et donc k est pair : k=2k'.
+Ainsi, a=(g^k')².
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 2
+Soit a dans (Z/pZ)*, on a a^((p-1)/2) = 1 ou -1.
+
+Preuve
+On a bien sûr (a^((p-1)/2))²=1.
+Or 1 et -1 sont racines du polynôme a²-1
+et comme Z/pZ est un corps, et deg(X²-1)=2, ce sont les seules.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 3
+Exactement la moitié des éléments de (Z/pZ)* sont racines de X^((p-1)/2) = 1 (i.e. sont des carrés)
+
+Preuve
+Comme Z/pZ est un corps et comme X^((p-1)/2)-1 est de degré (p-1)/2,
+ce polynôme a au plus (p-1)/2 racines dans Z/pZ.
+De même pour le polynôme X^((p-1)/2)+1.
+
+Les p-1 éléments de (Z/pZ)* étant tous racines de l'un ou de l'autre,
+X^((p-1)/2)-1 et X^((p-1)/2)+1 ont chacun exactement (p-1)/2 racines.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 4
+Soit a dans (Z/pZ) un carré.
+
+Si p=3 mod 4,
+alors a^((p+1)/4) est une racine carrée de a.
+
+Preuve
+Comme p=3 mod 4, on a bien p+1 qui est un multiple de 4.
+Il suffit de vérifier que (a^((p+1)/4))²=a.
+(a^((p+1)/4))²	= a^((p+1)/2)
+		= a^((p-1)/2)*a
+		= a 		[car a est un carré et par Prop 1]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

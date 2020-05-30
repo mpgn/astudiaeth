@@ -1,0 +1,449 @@
+On reprend ici des Prop données pour Crypto2018Ex4 et on les complète par de nouvelles.
+Il vaut mieux traiter Crypto2018Ex4 avant de s'attaquer à celui-ci.
+
+Soit p un nombre premier impair. Ceci afin que p-1 soit divisible par 2. Si p=2 tout le monde est carré.
+
+0 est toujours un carré dans Z/pZ et on peut ne s'intéresser maintenant qu'aux inversibles.
+
+
+La Prop 1 est une caractérisation des carrés de (Z/pZ)* 
+fondamentale pour démontrer des propriétés sur les carrés.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 1 (critère d'Euler)
+Soit a dans (Z/pZ)*.
+a est un carré  <=> a^((p-1)/2) = 1
+
+Preuve
+Le sens (=>) est évident, voyons l'autre.
+Soit g un générateur de (Z/pZ)*.
+On a alors a=g^k pour un certain k.
+On a alors g^(k(p-1)/2) = 1  donc p-1=ordre(g)|k(p-1)/2 et donc k est pair : k=2k'.
+Ainsi, a=(g^k')².
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 2
+Soit a dans (Z/pZ)*, on a a^((p-1)/2) = 1 ou -1.
+
+Preuve
+On a bien sûr (a^((p-1)/2))²=1.
+Or 1 et -1 sont racines du polynôme a²-1
+et comme Z/pZ est un corps, et deg(X²-1)=2, ce sont les seules.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Conclusion et lien avec Legendre.
+Comme on a 0^((p-1)/2) = 0,
+Lorsqu'on prend a dans (Z/pZ), on a donc
+
+a^((p-1)/2) = 0  <=> a = 0,
+
+a^((p-1)/2) = 1  <=> a est un carré non nul,
+
+a^((p-1)/2) = -1 <=> a n'est pas un carré.
+
+C'est exactement ce que traduit le symbole de Legendre :
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Def 5 (Legendre)
+Soit n un entier relatif et gardons p premier impair.
+On définit [n|p] le symbole de Legendre entre n et p par : (D'habitude bien sûr verticalement.)
+
+[n|p]:= 0 si n = 0 mod p
+
+[n|p]:= 1 si n est un carré non nul modulo p
+
+[n|p]:= -1 si n n'est pas carré modulo p
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Commentaire perso.
+Ca s'appelle un symbole parce que les mathématiciens sont chépères et qu'ils font genre ça vient de nulle part.
+Mais avec ce qu'on a vu précédemment, on comprend que c'est de la poudre aux yeux et que la proposition suivante
+est une évidence !
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 6
+Soit n un entier.
+On a l'égalité [n|p]= n^((p-1)/2) mod p.
+
+Preuve
+Incroyable n'est-ce pas...
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Donc de la même manière qu'on sait dire si n est un carré ou non modulo p,
+on sait calculer [n|p].
+Remarquons que comme c'est le calcul d'une puissance modulo p,
+c'est très efficace par l'exponentiation rapide mod p.
+Voyons un cas particulier qui sera utile à la fin et dans les exercices.
+Quand est-ce que -1 est un carré modulo p.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 7
+On a [-1|p] = 1 <=> p = 1 mod 4.
+
+Preuve
+Cela veut dire que -1 est un carré modulo p <=> p=1 mod 4.
+D'où cela sort-il ?
+Du critère d'Euler bien sûr:
+ -1 est un carré <=> (-1)^((p-1)/2) = 1.
+
+Or on voit bien que  (-1)^((p-1)/2) = 1 <=> (p-1)/2 est pair
+					<=> p-1 est multiple de 4
+					<=> p = 1 mod 4.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Donc dès que vous voyez p = 3 mod 4, vous devez vous dire 2 choses :
+- je sais calculer une racine carré mod p et aussi une mod q et donc une mod n(voir 2018Ex4)
+- et aussi -1 n'est pas un carré.
+
+Si vous voyez p = 1 mod 4 c'est juste -1 est un carré.
+
+Alors à quoi sert ce symbole ?
+A être manipulé facilement en exprimant des propriétés sur les carrés.
+Il vaut mieux comprendre d'où vient la manipulation de la Prop 7.
+Et retenir la Prop 9 avec le conseil que j'y donne.
+
+Tout cela ne sert à rien sur Legendre car on sait déjà le calculer facilement.
+Mais ces manipulations s'étendront ensuite à Jacobi et ce sera utile.
+
+Voyons les deux manipulations Prop 7 et Prop 9.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 8
+Soient m et n des entiers relatifs.
+On a [m*n|p] = [m|p]*[n|p].
+
+Preuve
+Cela veut dire que    m*n est un carré mod p <=> | m et n sont tous deux des carrés mod p
+						 |		ou
+						 | ni m ni n ne sont des carrés mod p .
+Commençons par la remarque suivante.
+Si m et n sont sont tous deux des carrés mod p, alors m*n est évidemment un carré.
+Comment montrer le reste ?
+Il ne semble pas évident que si (ni m ni n ne sont des carrés mod p) alors (m*n est un carré mod p).
+
+De nouveau le critère d'Euler s'avère donc très puissant:
+ m*n est un carré mod p <=> (m*n)^((p-1)/2) = 1 mod p
+			<=> (m)^((p-1)/2) * (n)^((p-1)/2) = 1 mod p.
+			<=> | m et n sont tous deux des carrés mod p
+			    |		ou
+			    | ni m ni n ne sont des carrés mod p .
+
+Cela se résume bien par [m*n|p] = [m|p]*[n|p] et cette formule est élégante car elle dit que c'est un morphisme
+de (Z/pZ)* dans {+/-1} dont le noyau est l'ensemble des carrés.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Voici un corollaire qui permet d'éliminer des carrés.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Cor 9
+Soient m et n des entiers relatifs.
+On a [m²*n|p] = [n|p].
+
+Preuve
+[m²*n|p] = [m²|p] * [n|p] 	(par Prop 8)
+	 = [n|p]		(on a bien [m²|p]=1 car m² est un carré modulo p, ne pas oublier que c'est m au carré...)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 10 (loi de réciprocité quadratique)
+Soient p et q premiers impairs.
+Alors on peut bien définir les symboles de Legendre réciproques [p|q], [q|p]
+et on a [p|q] = (-1)^((p-1)(q-1)/4) * [q|p]
+
+Preuve
+Si p=q, alors ça fait 0 de chaque coté et c'est facile.
+
+Sinon la preuve est délicate et on ne va pas la regarder.
+Remarquons simplement que dans ce cas [q|p] et [p|q] sont 1 ou -1.
+Et 1/(-1)=-1 et 1/(1)=1. Donc 1/[q|p] = [q|p].
+Et donc en divisant la loi de réciprocité quadratique par [q|p] on obtient :
+[p|q] * [q|p] = (-1)^((p-1)(q-1)/4)
+
+Alors que naïvement on a 	[p|q] * [q|p] =   p ^((q-1)/2) *   q ^((q-1)/2).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A quoi cette loi de réciprocité quadratique sert-elle pour Legendre ?
+Surement à rien ! Puisqu'on savait déjà tout calculer.
+
+Mais nous allons maintenant construire le symbole de Jacobi,
+qui essaie d'étendre Legendre quand on est modulo n non premier.
+
+Or les manipulations de l'ancien symbole fonctionneront aussi pour le nouveau.
+Et cette loi ainsi que la Prop 8 seront une manière de calculer le nouveau rapidement.
+
+En effet, lorsqu'on travaille modulo n non premier, (Z/nZ)* n'est plus un groupe cyclique.
+Donc on ne peut plus dire a^(n-1)=1 (Fermat).
+
+(On pourrait à la limite dire a^phi(n)=1.										)
+(Mais si cela marche pour les inversibles, il reste les non inversibles qui ont eux aussi le droit d'être des carrés.	)
+(Et comme ils n'ont pas de gilet jaune pour se manifester, on va les laisser tranquille même s'ils manquent d'intégrité.)
+
+Et donc le critère d'Euler tombe à l'eau.
+ALERTE 1:
+NE SURTOUT PAS CALCULER UN SYMBOLE DE JACOBI AVEC n premier PAR a^((n-1)/2).
+GARDER CELA POUR p premier.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Def 11 (Jacobi)
+
+Soit n un entier naturel impair. (On voit qu'on a donné tous nos résultats sur les nombres premiers avec p > 0 impair)
+Et écrivons n = p1^v1 * p2^v2 * ... * ps^vs la décomposition en facteurs premiers de n. (Comme n est impair, il n'y a pas 2.)
+
+Soit m un entier relatif.
+
+On définit [m|n] le symbole de Legendre entre m et n par : (D'habitude bien sûr verticalement.)
+
+[m|n]:= [m|p1]^v1 * [m|p2]^v2 * ... * [m|ps]^vs.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ALERTE 2: Legendre nous disait bien si m était un carré ou non.
+Mais Jacobi n'est pas si clair et il faudra l'interpréter avec prudence.
+
+Il faut bien connaître la définition précédente et alors les propriétés suivantes,
+que nous avons séparées pour pouvoir faire des commentaires sur leur utilité, se retrouvent facilement.
+Commençons par la plus facile.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 12
+Soit n un entier naturel impair.
+Soit m un entier relatif.
+
+Un symbole de Jacobi vaut toujours 0, 1 ou -1.
+
+De plus [m|n] = 0 <=> m et n ne sont pas premiers entre eux.
+
+Preuve
+0, 1 ou -1 parce que c'est un produit de symboles de Legendre qui valent donc 0, 1 ou -1.
+
+  m et n ne sont pas premiers entre eux <=> il existe pi dans la décomposition de n tel que pi|m
+					<=> il existe pi dans la décomposition de n tel que [m|pi]=0.
+					<=> [m|n] = 0 (car un produit de facteurs est nul
+							ssi l'un au moins de ses facteurs est nul)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Voyons les plus utiles.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 13
+Soit n un entier naturel impair.
+Soient m et m' des entiers relatifs.
+
+Si m=m' mod n, alors [m|n]=[m'|n]
+
+Preuve
+Par le théorème chinois, m=m' mod n <=> m=m' mod (pi^vi) [pour tout 1 <= i <= s].
+(Et oui! Le théorème chinois permet de casser les facteurs de n premiers entre eux mais pas les puissances.)
+
+Et m=m' mod (pi^vi) implique m=m' mod pi [pour tout 1 <= i <= s].
+
+Donc pour tout 1 <= i <= s, [m|pi]=[m'|pi] car le symbole de Legendre est donné par le critère d'Euler modulo pi,
+
+Et donc [m|n]=[m'|n].
+
+Utilité
+On peut réduire le haut modulo le bas
+On a [2705884|10] = [4|10]. Pratique, n'est-ce pas ?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+La Prop 14 est simple et (ii) est très intéressant dans un cas particulier. (On touche à la fin).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 13
+Soit n et n' des entiers naturels impairs.
+Soient m et m' des entiers relatifs.
+
+On a les relations suivantes :
+(i) [m|n*n']=[m|n]*[m|n'] (On s'en fiche un peu...)
+
+(ii) [m*m'|n]=[m|n]*[m'|n] (C'est intéressant !)
+
+
+Preuve
+On constate une symétrie. Mais (i) et (ii) n'ont pas le même statut.
+
+(i) est simplement due à la définition de Jacobi
+puisque la décomposition en facteurs premiers de n*n'
+est le produit des décompositions en facteurs premiers de n et n'.
+
+(ii) [m*m'|n] = [m*m'|p1]^v1 * [m*m'|p2]^v2 * ... * [m*m'|ps]^vs
+Et on hérite de la Prop 8 qui dit que pour Legendre, [m*m'|p]=[m|p]*[m'|p].
+
+Utilités
+Le cas particulier m=m' ou n=n' donne donc
+(i) [m|n²]=[m|n]*[m|n]=1 si m et n sont premiers entre eux (0 sinon).
+(ii) [m²|n]=[m|n]*[m|n]=1 si m et n sont premiers entre eux (0 sinon).
+
+(i) Souligne seulement qu'il est rapide de calculer [14|45] = [14|9]*[14|5] = [14|5]
+Mais il suffit d'être intelligent avec la définition, [14|45] = [14|3]² * [14|5]
+les puissances de symboles de Legendre paires donnent 1
+et n'ont pas besoin d'être calculées.
+
+(ii) Donne Prop 15 qui est enfin ce à quoi sert Jacobi.
+Et aussi souligne qu'il est rapide de calculer [45|77] = [9|77]*[5|77] = [5|77] (=[5|7]*[5|11]=critère d'Euler)
+
+En résumé si on identifie des carrés en haut ou en bas ont peut les éliminer facilement. Mais surtout:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 15
+Soit n un entier naturel impair.
+Soit m un entier relatif premier avec n.
+
+Si m est un carré modulo n, alors [m|n]=1.
+
+Preuve
+Si m=a² mod n, alors [m|n]=[a²|n] 	par Prop 12
+			  = 1		par Prop 13 (ii).
+
+Utilité.
+On n'a pas d'équivalence mais cette implication est déjà bien utile.
+
+On utilise en fait sa contraposée :
+
+Si [m|n]=-1, alors m n'est pas un carré modulo n.
+C'EST TOUT CE QU'ON PEUT DIRE EN VOYANT LE SYMBOLE DE JACOBI.
+
+Si vous êtes déçu, remarquez d'abord dans le cas particulier n=pq,
+vous savez déjà travailler comme dans l'Ex4 de 2018, gràce au théorème chinois mais surtout regardez ce qui suit.
+
+La dernière propriété dit simplement que la loi de réciprocité quadratique se généralise à Jacobi
+et donne une méthode de calcul très intéressante...
+En effet cette loi permet de renverser le symbole, et donc à part des calculs des puissances de -1,
+en réduisant chaque fois la partie du haut modulo la partie du bas,
+on va aussi vite que l'algorithme d'euclide,
+ET AVEC LA MEME QUALITE DE NE PAS AVOIR EU A FACTORISER m OU n !!
+Donc on a des chances de savoir que m n'est pas carré modulo n sans factoriser.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 16 (loi de réciprocité quadratique)
+Soient m et n deux entiers naturels impairs.
+
+Alors on peut bien définir les symboles de Jacobi réciproques [m|n], [n|m]
+et on a [m|n] = (-1)^((m-1)(n-1)/4) * [n|m].
+
+Preuve
+On peut bien casser [n|m] et [m|n] en deux produits avec que des nombres premiers en haut et en bas.
+La seule difficulté que je passe juste pour économiser votre temps et énergie,
+est de montrer que (-1)^((m-1)(n-1)/4) est bien aussi le produit des (-1)^((pi-1)(qj-1)/4)
+où les pi et les qj sont les facteurs premiers de m et n.
+Retenez simplement ce qu'on a dit pour se souvenir de Prop 10 et que c'est fait pour Jacobi.
+
+Un dernier point important :
+Dans cette propriété on a supposé m et n impairs positifs.
+Dans notre contexte, n ne sera pas pair car on veut en général le factoriser et la parité ça se voit un peu.
+Il ne sera pas non plus négatif.
+Mais m peut être l'un ou l'autre et dans les étapes de calcul avec la réciprocité,
+on peut tomber à nouveau avec un truc en haut qui est pair ou négatif.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 17 (non démontrée)
+Le coup de bol, c'est que Prop 7 reste vraie pour Jacobi:
+[-1|n] = 1 <=> n=1 mod 4 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Et donc on peut juste sortir le -1 comme ça : [-15|n] = [-1|n]*[15|n]
+On regarde si n=1 mod 4 on a [-1|n]=1, sinon [-1|n]=-1.
+On peut faire de la réciprocité sur [15|n].
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prop 18 (non démontrée)
+Et on a aussi une caractérisation semblable pour savoir si 2 est un carré modulo n:
+[2|n] = 1 <=> (n=1 mod 8 ou n=-1 mod 8).
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Et donc si m est pair, on peut sortir tous les 2 jusqu'à obtenir un nombre impair.
+S'il y avait un nombre pair de 2 cela fait un carré et donc ça vaut 1.
+Sinon, on calcule n mod8. Si ça fait 1 ou -1 , alors [2|n] = 1.
+Sinon [2|n] = -1
+
+Ouf!
+
+Exercice 4 :
+a.
+Théorème chinois, déjà fait dans un exo de 2018.
+b.
+
+On a bien sûr x^(lambda/2) qui est une racine carrée de 1 d'après a.
+Reste à montrer que ce n'est ni 1 ni -1.
+
+C'est une question assez subtile. On va se servir de Jacobi, du théorème chinois un peu comme dans 2018Ex4 car n=pq
+et de la traduction des hypothèses de l'énoncé p=3 mod 4 et q=3 mod 4 qui peuvent sembler annodine pour l'instant.
+
+C'est un bon réflexe de se dire que x n'est pas un carré modulo n car le symbole de Jacobi vaut -1.
+Et c'est un bon réflexe de vouloir utiliser le théorème chinois pour dire que x ne va pas être un carré modulo p ou modulo q.
+
+Mais en fait quand on a à la fois du jacobi et des chinois, il faut écrire la définition de Jacobi.
+	(-1) = [x|n] = [x|p]*[x|q]
+On a donc x qui est un carré mod p mais pas mod q ou le contraire.
+
+On peut suppooser que x un carré mod p mais pas mod q. (*)
+
+On a donc envie de travailler modulo p et modulo q pour montrer que x^(lambda/2) n'est pas 1 ou -1.
+Posons phi l'isomorphisme chinois entre Z/nZ et Z/pZxZ/qZ.
+(Je parle de cet isomorphisme car il aide à penser correspondance entre élément et paire. Et c'est un point de vue indispensable.)
+Souvenons nous que phi(1)=(1,1) i.e. les neutres multiplicatifs sont en correspondance.
+Donc il faut montrer que ici on n'a pas phi(x^(lambda/2)) = (1,1).
+
+On peut se demander si -1 n'est pas aussi en correspondance avec un élément particulier.
+Et bien oui ! Car 0 et 1 ont des rôles privilégiés et on a toujours 1+-1=0 et il a donc le statut privilégié d'opposé de 1.
+Quel est l'opposé de (1,1) ? Oui c'est ça.
+Donc il faut montrer qu'on a pas phi(x^(lambda/2)) = (-1,-1).
+ 
+d'après (*), on a |x^(p-1)/2 = 1 mod p
+		  |et
+		  |x^(q-1)/2 = -1 mod q.
+
+Ca sent bon le (1,-1) !
+
+On a donc bien sûr x^lambda/2 = 1 mod p car lambda est un multiple de p-1.
+Et donc déjà x^(p-1)/2 qui ne peut pas valoir -1. Car il est en correspondance avec (1,quelque chose).
+
+Mais que dire de x^lambda/2 mod q ?
+On aimerait que ça fasse -1 donc on aimerait bien que lambda/2 = (q-1)/2 *"pas un truc pair"
+car sinon on met le -1 à une puissance paire et ça fait 1. 
+
+Traduisons les hypothèses :
+ p=3 mod 4 et q=3 mod 4 <=> p-1 et q-1 sont pairs mais non divisibles par 4.
+Donc lambda=ppcm(p-1,q-1) est pair mais non divisible par 4.
+
+C'est gagné : 
+lambda=(q-1)*k avec k un entier et comme q-1 est pair et que lambda n'est pas divisible par 4, k est impair.
+Et donc lambda/2=k*(q-1)/2.
+
+Et donc x^lambda/2 = (x^(q-1)/2)^k mod q
+		   = (-1)^k mod q
+		   = (-1) mod q       car k est impair.
+
+c.
+En connaissant les hypothèses de RSA et avec quelques traductions hyper classiques, c'est facile. Essayez !
+
+Dans RSA, e et d sont inverses modulo phi(n).
+Donc on a ed-1=0 mod phi(n).
+Ou encore phi(n) divise ed-1.
+
+Or phi(n)=(p-1)*(q-1) donc lambda = ppcm(p-1,q-1) | phi(n) | ed-1.
+
+d.
+C'est trouvable à l'instinct.
+
+On a déjà dit que lambda était pair. Donc évidemment si (ed-1)/2^j est impair, lambda ne peut pas le diviser.
+On a montré que lambda/2 était impair.
+
+On a lambda/2 | lambda | (ed-1) d'après c.
+
+Ici c'est au niveau des facteurs que ça se joue pour avoir l'intuition.
+On a (ed-1)=lambda/2*k avec k un entier.
+Mais comme on peut diviser ed-1 par 2^j et que lambda/2 ne peut pas être à nouveau divisé par 2 même une fois,
+on a nécessairement k=2^j*k'. (**)
+
+Donc (ed-1) = lambda/2 * 2^j*k' et donc (ed-1)/2^j = lambda/2 * k'. (**)
+CQFD
+
+e.
+Ce sont les idées de la b prolongées.
+On peut affiner (**). Comme on a sorti toutes les puissances de 2 de ed-1, on les a aussi sorties de lambda/2*k donc de k.
+Donc k' est impair.
+
+Et donc x^((ed-1)/2^j) = (x^(lambda))^k' mod q
+		       = (-1)^k' = -1    mod q
+
+Et on a toujours x^((ed-1)/2^j) = (x^(lambda))^k' mod p
+				= (1)^k' = 1      mod p
+
+Donc à nouveau ce n'est ni 1, ni -1.
+Et c'est encore une racine carrée de 1 car au carré le lambda/2 devient lambda.
+
+f.
+C'est le cas où on a des éléments distincts et non opposés mod n qui donnent le mème résidu quadratique modulo n.
+Supposons qu'on ait trouvé x avec [x|n]=-1.
+Posons X = x^((ed-1)/2^j) et Y = 1.
+
+Alors on a X²=Y² mod n. Donc X²-Y²=0 mod n. Donc (X+Y)(X-Y) = 0 mod n.
+Mais comme X n'est pas +/-1 modulo n, on a X!=+/-Y mod n.
+
+Donc X+Y et X-Y se sont pas des multiples de n mais (X+Y)(X-Y) en est un.
+C'est donc que les facteurs de n sont cassés en 2 morceaux répartis entre X+Y et X-Y.
+Et donc en calculant pgcd(X+Y,n) on récupère un facteur non trivial de n.
+
+Pour le x tel que [x|n]=-1, on peut tirer des x au pif et voir si le jacobi fait -1.
+En effet, on n'a pas besoin de factoriser n pour calculer le jacobi gràce à la réciprocité quadratique.
+Et comme on est modulo pq, on a de bonnes chances de tomber sur un élément qui sera un carré modulo p et pas modulo q
+ou le contraire.
+Car la moitié des éléments dans Z/pZ sont des carrés et donc le reste n'en sont pas.
+Pareil dans Z/qZ, et p et q sont "déphasés".
+
+
