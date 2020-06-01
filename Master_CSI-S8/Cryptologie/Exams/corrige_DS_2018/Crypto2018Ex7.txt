@@ -66,7 +66,3 @@ On a C=2 mod 211.
 On calcule donc C^78=169 mod 211
 Donc M = 169.
 ...QU'EST-CE QU'ON EST CONTENT ...
-
-On remarquera qu'on ne se sert nulle part des hypothèses p ne divise pas q-1 et q ne divise pas p-1.
-Et que prendre n=p²q au lieu de n=pq est une fumisterie.
-Soit on est bête, soit cet exercice est de mauvaise facture.
