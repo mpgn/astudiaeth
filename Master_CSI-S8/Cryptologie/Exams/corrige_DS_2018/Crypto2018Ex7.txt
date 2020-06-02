@@ -2,14 +2,8 @@ Exercice 7:
 1.
 Je ne vois que la méthode classique suivante.
 On sait que ppcm(p-1,q-1)*pgcd(p-1,q-1)=(p-1)(q-1)
-On calcule donc pgcd(p-1,q-1) par l'algorithme d'euclide qui a une complexité O(M²) avec M=max(p-1,q-1)
-
-(Comme ce ne sont que des divisions euclidiennes avec des nombres inférieurs à p-1 et à q-1,
-les techniques qui font des calculs modulo p,p-1,q ou q-1 ne semblent pas meilleures)
-
-Et on en déduit ppcm(p-1,q-1) = (p-1)(q-1)/pgcd(p-1,q-1).
-C'est cette division qui est longue car (p-1)(q-1) est grand
-et l'algorithme du cours de calcul formel donne une complexité O(((p-1)(q-1))^2).
+On calcule donc pgcd(p-1,q-1) par l'algorithme d'euclide
+et on en déduit ppcm(p-1,q-1) = (p-1)(q-1)/pgcd(p-1,q-1).
 
 2.
 On souhaite montrer que n est inversible modulo r.
@@ -37,17 +31,15 @@ On trouve alors u,v entiers tels que u*n+v*r=1 et donc u*n = u*n+v*r = 1 mod r.
 On a pose donc d = u.
 
 4.
-Par le petit théorème de Fermat (ou Lagrange si on préfère),
+Par le petit théorème de Fermat,
 on a M^(p-1)=1 mod p
-Comme évidemment p-1|ppcm(p-1,q-1), on a bien M^r=1 mod p.
+Comme p-1|ppcm(p-1,q-1), on a bien M^r=1 mod p.
 De même pour q.
 
 5.
 Il s'agit de regarder quels calculs on peut faire sur C pour que le n de M^n disparaisse.
-On peut d'abord penser qu'il faut trouver une puissance k telle que M^k=1 mod n
-et croire que k=r convient mais comme n=p²q, on ne peut pas appliquer le théorème chinois
-et donc ce n'est probablement pas le cas.
 
+0<M<pq et les questions précédentes incitent à passer mod pq.
 Remarquons que si a=b mod p²q, alors a=b mod pq.
 En effet, si p²q divise a-b, alors p et q divise a-b et donc pq divise a-b.
 
@@ -65,4 +57,3 @@ On trouve la relation de Bézout 78*n-1187*r=1.
 On a C=2 mod 211.
 On calcule donc C^78=169 mod 211
 Donc M = 169.
-...QU'EST-CE QU'ON EST CONTENT ...
