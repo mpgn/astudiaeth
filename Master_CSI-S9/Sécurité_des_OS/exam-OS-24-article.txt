@@ -1,0 +1,583 @@
+                             ==Phrack Inc.==
+
+                Volume 0x10, Issue 0x47, Phile #0x0C of 0x11
+
+|=-----------------------------------------------------------------------=|
+|=-[ Finding hidden kernel modules (extrem way reborn): 20 years later ]-=|
+|=-----------------------------------------------------------------------=|
+|=------------------[ g1inko <g1inko at hotmail com> ]-------------------=|
+|=-----------------------------------------------------------------------=|
+
+0 intro
+1 Some words on LKM-rootkits
+2 On existing tools
+    2.1 Some words on the original module_hunter
+    2.2 rkspotter and __module_address() problem
+    2.3 Other challenges in adopting _that_ extrem way
+3 The rebirth
+    3.1 Detecting a stray struct module
+    3.2 On virtual memory of x86_64 architecture
+    3.3 Paging levels while solving the 'problem of unmapped'
+4 Other architectures and outro
+5 References
+6 The code
+
+
+0 intro
+=======
+
+Several years ago, while trying to get a grasp on Linux kernel rootkits,
+I came across an old Phrack Linenoise article [1] that discussed an
+interesting way of finding them. It totally caught my attention, even
+though it was so mysterious and far beyond my knowledge and experience
+back then.
+
+It took me some time to fill in the gaps in my knowledge. Eventually I
+realized I was ready to reimplement the idea of finding hidden kernel
+modules in memory for modern kernels and x86_64 machines. Now, 20 years
+after the original publication, I am somewhat proud to finally share the
+rebirth of this technique, with all the honors to madsys for inspiration.
+
+
+1 Some words on LKM-rootkits
+============================
+
+Since the first publication (known to me, at least) about Linux kernel
+rootkits in Phrack in April 1997 [2], and right up to this day, malicious
+loadable kernel modules (LKM-rootkits) all tend to use the same self-
+hiding technique, namely unlinking themselves from the in-kernel linked
+list of loaded modules. This prevents the module from showing up in procfs
+and lsmod, and rmmod is unable to find and unload such modules.
+
+Some rootkits also try to mess with the memory afterwards, to make
+forensics even harder. For example, since version 2.5.71, Linux poisons
+stale list pointers of the unlinked struct by setting them to LIST_POISON1
+and LIST_POISON2 (0x00100100 and 0x00200200). This is used to help detect
+memory bugs.
+
+Some anti-rootkits use this to detect unlinked LKM descriptors, thus
+detecting a kernel rootkit. However, a rootkit can overwrite these values
+after unlinking and evade this check. For instance, the KoviD LKM that
+appeared in 2022 [3] does this.
+
+Also, despite the fact that LKM rootkits do unlink themselves from the
+modules list, they still can be listed via sysfs in /sys/modules. This is
+even mentioned in the Volatility documentation [4] and is an established
+method for detecting such rootkits. Although Volatility developers claim
+to never have faced a rootkit that would also remove itself from sysfs,
+KoviD rootkit does it as well.
+
+For that, KoviD uses sysfs_remove_file() helper, and sets its state to
+MODULE_STATE_UNFORMED. This state is for cases when a module is still
+setting up, and the kernel module loader is still running. This trick
+helps to evade anti-rootkits that rely on the kernel __module_address()
+function when enumerating virtual memory, such as rkspotter [5].
+
+
+2 On existing tools
+===================
+
+2.1 Notes on the original module_hunter
+---------------------------------------
+
+The original implementation was created during the time of Linux 2.2-2.4
+for i386 machines. Now it is Linux ~6.8 and lots of x86_64 systems around.
+So many things have changed or removed, and new features were introduced.
+The kernel is known to have highly unstable internal API, no surprise that
+the 20-years-old module_hunter.c wouldn't build anymore. By understanding
+how it works, it turns out to be possible to reimplement the technique for
+a modern kernel.
+
+In short, the logic for finding a malicious LKM was to go through the
+memory region that contained module structs, and dump the info if it
+contained anything that looked like a sane struct module. At the time,
+this struct had way less fields than it does today, as it has been heavily
+reworked and extended over the years.
+
+For example, there is no more 'size' field, but many others were added.
+It is interesting that module's name at that time was stored using a
+pointer, while nowadays it is a static array of chars right within the
+struct module.
+
+
+2.2 rkspotter and __module_address() problem
+--------------------------------------------
+
+While looking for a way to look for safe memory addresses via brute force,
+I found the aforementioned anti-rootkit named rkspotter. It detects several
+hiding techniques which allows it to find rootkits even if one the methods
+fail, but it relies on the __module_address() function in the kernel.
+
+This function was unexported in 2020 during a series of kernel patches [6],
+and became unavailable out-of-kernel since Linux 5.4.118. This means that
+we must avoid using it as well.
+
+The core idea of rkspotter is to go through the so-called module mapping
+space, and check which address belongs to which module using
+__module_address(). According to the doc, it lets one 'get the module which
+contains an address'.
+
+For a given address, __module_address() returns a struct module pointer of
+a corresponding LKM. This function was a convenient way to get module info,
+all the work for dereferencing page tables and checking for physical page
+presence was done internally.
+
+Well yes, I know that I could try to copycat this __module_address() in the
+module's code, but what I wanted to copycat was module_hunter by madsys, so
+forget it :D
+
+
+2.3 Other challenges in adopting _that_ extrem way
+--------------------------------------------------
+
+Based on what has been changed over the years, we will need to solve a few
+problems to implement a newer tool (or rather a PoC?) for finding stray LKM
+descriptors. Problems like:
+
+  - Fix broken kernel API. As the code of module_hunter is actually very
+    small, and the only API used was for procfs, it didn't take long to
+    find a way to export a proc file to communicate with the kernel module.
+
+  - Choose new fields of struct module that are the most appropriate for
+    detecting a stray struct.
+
+  - Memory management on x86_64 differs from that of i386, so the code that
+    checks for the page's presence needs to be fully reimplemented, more on
+    that below.
+
+  - Kernel virtual memory layout on x86_64 is also totally different from
+    that of i386. For instance, the kernel part of virtual memory space on
+    x86_64 is very huge compared to vmalloc area of its 32-bit predecessor,
+    where struct modules were allocated back then (that is, 128 TB vs.
+    128 MB).
+
+    Since the modules region is way larger on x86_64, more checks are
+    needed to eliminate false positives on garbage remnants in memory.
+
+With enough time and persistence, we at least get repaid with new cool
+knowledge, so let's go!
+
+
+3 The rebirth
+=============
+
+3.1 Detecting a stray struct module
+-----------------------------------
+
+After playing with existing struct module fields I decided to introduce
+more checks on memory contents, beyond just checking for the validity of
+a module's name. That alone showed to be insufficient for x86_64 modules
+memory area--more on this in 3.2), such as:
+
+- The state field has one of the sane values: MODULE_STATE_LIVE,
+  MODULE_STATE_COMING, MODULE_STATE_GOING, MODULE_STATE_UNFORMED;
+
+- The init and exit fields either point into the module mapping space of
+  x86_64 or are NULL;
+
+- At least one of init, exit, next and prev fields is not NULL and point
+  to either module mapping area or are canonical (e.g. list pointers);
+
+- core_layout.size is not 0, but equals to 0 modulo PAGE_SIZE.
+
+This list may vary in future, especially if i catch some more sophisticated
+LKM. The check may become more flexible, but it works as PoC quite well.
+
+
+3.2 On virtual memory of x86_64 architecture
+--------------------------------------------
+
+Now that we've determined fields of interest, we need to know where to
+start and finish testing for struct module similarity. Otherwise it would
+be quite tough to bruteforce the whole almost-64-bit virtual address space.
+
+In the virtual memory layout of modern x86_64 Linux, there is a dedicated
+module mapping space [7], with size of 1520 MB, for both 48- and 57-bit
+virtual addresses. The start address is designated with a macro
+MODULES_VADDR and the end address is represented by a MODULES_END macro.
+
+After some more playing, I found out that module mapping space is where
+both module binaries, and their descriptors get allocated. This is just
+fine, as going through many terabytes of the vast virtual address space
+was my biggest concern in terms of execution time.
+
+
+3.3 Paging levels while solving the 'problem of unmapped'
+---------------------------------------------------------
+
+NOTE: If you're not quite familiar with paging mechanism, refer to e.g. the
+      OSDev wiki [8] or Linux documentation [9] (or processor's).
+
+Now we are a facing the same problem as the one noted in the original paper:
+
+  ``By far, maybe you think: umm, it's very easy to use brute force to list
+    those evil modules". But it is not true because of an important
+    reason: it is possible that the address which you are accessing is
+    unmapped, thus it can cause a paging fault and the kernel would report:
+    "Unable to handle kernel paging request at virtual address".  ''
+
+This would be resolved automatically when using __module_address(), but we
+cannot afford it, so we need to check for page presence ourselves. To do
+that, we need to go through tables that contain info about relations of
+virtual and physical pages for a process. The kernel space part is the
+same for each process because it maps to the same physical pages.
+
+For supporting more physical memory, more page table levels were added in
+64-bit x86, and now it can be 4 or 5 of them depending on both hardware
+and kernel support. For each paging level, the PDE/PTE being dereferenced
+must be checked for presence in RAM by using one of the following macros:
+
+- pgd_present();
+- p4d_present() (if 5-level paging is used or emulated);
+- pud_present();
+- pmd_present();
+- pte_present().
+
+Without getting too deep into the MMU guts, the check for the top level,
+using currently available kernel macros and functions would look like this:
+
+    ----snip----
+    struct mm_struct *mm = current->mm;
+    ----snip----
+    pgd = pgd_offset(mm, addr);
+    if (!pgd || pgd_none(*pgd) || !pgd_present(*pgd) )
+        return false;
+    ----snip----
+
+You may find this check a bit paranoid and, especially looking at similar
+in-kernel functions, maybe it's okay to remove pgd_none(). When I'm writing
+kernel C for a subsystem I am not quite familiar with, I feel much better
+safe than sorry :D
+
+There was a function called kern_addr_valid() performing similar checks,
+but it was removed from the kernel a year ago [10]. dump_pagetable(),
+spurious_kernel_fault(), mm_find_pmd() and some others also do that.
+
+As for the varying number of paging levels, we could find out the proper
+number with ether CONFIG_PGTABLE_LEVELS or CONFIG_X86_5LEVEL. The first
+one seems better if I (or anyone else) decide to port it to some other
+architecture.
+
+Support for 5-level paging was introduced in 2017 with versions 4.11-4.12
+[11, 12]. Interestingly, with CONFIG_PGTABLE_LEVELS=5 the kernel wouldn't
+break on 4-level hardware [13]:
+
+``In this case additional page table level - p4d - will be folded at runtime.''
+
+
+4 Other architectures and outro
+===============================
+
+The only thing that prevents us from getting the code to work on
+architectures other than x86_64 is (obviously) architecture-dependent
+stuff. Virtual address spaces of other architectures (i.e. AArch64)
+is different, not only in its layout and size, but also in the possible
+number of paging levels. This may vary from 2 to 4, depending on the page
+size and virtual addresses bits [14].
+
+Notably, the code did compile for AArch64 running the 6.1.21 kernel,
+until I added a check for CONFIG_X86_64. Due to memory management
+differences, it of course did not report anything found.
+
+As for kernel versions compatibility, I've tested the code on 4.4, 5.14,
+5.15 and 6.5 x86_64 kernels. It still may fail on some intermediate or
+newer versions, most likely somewhere in the page table dereferencing
+code. Feel free to let me know if that happens.
+
+Once all the hardware incompatibility issues are properly taken into
+account, I believe it's possible to run the tool on other architectures
+as well. Hopefully I can add support for at least AArch64 once I'm ready
+to dive into its memory management. PRs and suggestions (see [15]) are
+also welcome! :^)
+
+
+5 References
+============
+
+1.  http://phrack.org/issues/61/3.html#article
+2.  http://phrack.org/archives/issues/50/5.txt
+3.  https://github.com/carloslack/KoviD
+4.  https://github.com/volatilityfoundation/volatility/wiki/Linux-Command-
+Reference#linux_check_modules
+5.  https://github.com/linuxthor/rkspotter
+6.  https://cdn.kernel.org/pub/linux/kernel/v5.x/ChangeLog-5.4.118
+7.  https://www.kernel.org/doc/Documentation/x86/x86_64/mm.txt
+8.  https://wiki.osdev.org/Paging
+9.  https://www.kernel.org/doc/html/v6.5/mm/page_tables.html
+10. https://lore.kernel.org/lkml/Y05fQrd4TYaOnks%2F@infradead.org/
+11. https://github.com/torvalds/linux/commit/b8504058a06bd19286c8b59539eebfda69d1ecb5
+12. https://lwn.net/Articles/716324/
+13. https://www.kernel.org/doc/html/v5.9/x86/x86_64/5level-paging.html#enabling-5-level-paging
+14. https://www.kernel.org/doc/html/v6.5/arch/arm64/memory.html
+15. https://github.com/ksen-lin/nitara2
+
+
+6 The code (cleared a bit for the paper)
+========================================
+
+-----BEGIN NITARA2.C-----
+
+/*
+ * original idea: madsys, "Finding hidden kernel modules (the extrem way)"
+ *                http://phrack.org/issues/61/3.html
+ *
+ * usage: cat /proc/nitara2 && dmesg
+ */
+
+#include <asm/page.h>
+#include <asm/fixmap.h>
+#include <linux/errno.h>
+#include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/proc_fs.h>
+#include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 5, 0)
+#  include <linux/mm.h>
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(5, 8, 0)
+#  include <linux/pgtable.h>
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#  include <asm-generic/pgtable-nop4d.h>
+#else /* < 4.11 */
+#  include <asm/pgtable.h>
+#endif
+#include <linux/string.h>
+#include <linux/sched.h>
+#include <linux/types.h>
+#include <linux/unistd.h>
+#include <uapi/linux/stat.h>
+
+#ifndef CONFIG_X86_64
+#  error "arch not supported :("
+#endif
+
+#define NITARA_PRINTK(fmt, args...) \
+  printk("%s: " fmt, module_name(THIS_MODULE), ##args)
+#define NITARA_MODSIZE (0x1000 * PAGE_SIZE)
+
+#ifndef sizeof_field
+#define sizeof_field(TYPE, MEMBER) sizeof((((TYPE *)0)->MEMBER))
+#endif
+
+/* NOTE: arch-specific, we don't handle it yet */
+#ifndef __canonical_address
+static __always_inline u64 __canonical_address(u64 vaddr, u8 vaddr_bits)
+{
+  return ((s64)vaddr << (64 - vaddr_bits)) >> (64 - vaddr_bits);
+}
+#endif
+
+#ifndef __is_canonical_address
+static __always_inline u64 __is_canonical_address(u64 vaddr, u8 vaddr_bits)
+{
+  return __canonical_address(vaddr, vaddr_bits) == vaddr;
+}
+#endif
+
+#define is_canonical_48(p) __is_canonical_address((unsigned long)p, 48)
+#define is_canonical_or_zero(p) (p == NULL || is_canonical_48(p))
+#define is_canonical_high_or_zero(p) \
+  (p == NULL || ((unsigned long)p >= VMALLOC_START && is_canonical_48(p)))
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0)
+#define MODSIZE(p)                         \
+  (p->mem[MOD_TEXT].size                   \
+  + p->mem[MOD_INIT_TEXT].size             \
+  + p->mem[MOD_INIT_DATA].size             \
+  + p->mem[MOD_INIT_RODATA].size           \
+  + p->mem[MOD_RO_AFTER_INIT].size         \
+  + p->mem[MOD_RODATA].size                \
+  + p->mem[MOD_DATA].size)
+#else
+#  define MODSIZE(p) (p->core_layout.size)
+#endif
+
+/* How to check if an address is valid (no segfault) in kernel space ?
+ * https://stackoverflow.com/questions/11134813/
+ * https://stackoverflow.com/questions/66593710/
+ * https://lwn.net/Articles/716324/
+ */
+static bool valid_addr(unsigned long addr, size_t size)
+{
+  pgd_t *pgd;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+  p4d_t *p4d;
+#endif
+  pmd_t *pmd;
+  pud_t *pud;
+  pte_t *pte;
+  struct mm_struct *mm = current->mm;
+  unsigned long end_addr;
+
+  pgd = pgd_offset(mm, addr);
+  if (unlikely(!pgd)|| unlikely(pgd_none(*pgd))|| unlikely(!pgd_present(*pgd)))
+    return false;
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+  p4d = p4d_offset(pgd, addr);
+  if (unlikely(!p4d)|| unlikely(p4d_none(*p4d))|| unlikely(!p4d_present(*p4d)))
+    return false;
+  pud = pud_offset(p4d, addr);
+#else
+  pud = pud_offset(pgd, addr);
+#endif
+  if (unlikely(!pud)|| unlikely(pud_none(*pud))|| unlikely(!pud_present(*pud)))
+    return false;
+
+  pmd = pmd_offset(pud, addr);
+  if (unlikely(!pmd)|| unlikely(pmd_none(*pmd))|| unlikely(!pmd_present(*pmd)))
+    return false;
+
+  if (pmd_trans_huge(*pmd)) {
+    end_addr = (((addr >> PMD_SHIFT) + 1) << PMD_SHIFT) - 1;
+    goto end;
+  }
+  // NOTE: pte_offset_map() is unusable out-of-tree on >=6.5.
+  //       As pte_offset_kernel() seems to work, use it instead :D
+  pte = pte_offset_kernel(pmd, addr);
+  if (unlikely(!pte) || unlikely(!pte_present(*pte)))
+    return false;
+
+  end_addr = (((addr >> PAGE_SHIFT) + 1) << PAGE_SHIFT) - 1;
+
+end:
+  if (end_addr >= addr + size - 1)
+    return true;
+
+  return valid_addr(end_addr + 1, size - (end_addr - addr + 1));
+}
+
+static bool is_within_modules(void *p)
+{
+  return (unsigned long)p >= MODULES_VADDR && (unsigned long)p < MODULES_END;
+}
+
+__maybe_unused static bool is_within_modules_or_zero(void *p)
+{
+  return p == NULL || is_within_modules(p);
+}
+
+static bool check_name_valid(char *s)
+{
+  size_t i;
+  if (!s)
+    return false;
+
+  for (i = 0; i < sizeof_field(struct module, name); i += 1) {
+    /* we might fail here if the name is "" */
+    if (s[i] == '\0' && i != 0)
+      break;
+    if (s[i] < 0x20 || s[i] > 0x7e)
+      return false;
+  }
+  return true;
+}
+
+ssize_t showmodule_read(
+  struct file *unused_file,
+  char *buffer, size_t len,
+  loff_t *off
+)
+{
+  struct module *p;
+  unsigned long i;
+
+  NITARA_PRINTK("address                           module size\n");
+  for (
+    i = 0, p = (struct module *)MODULES_VADDR;
+    p <= (struct module*)(MODULES_END - 0x10);
+    p = ((struct module*)((unsigned long)p + 0x10)), i += 1
+  )
+  {
+    if (
+        valid_addr((unsigned long)p, sizeof(struct module)) &&
+        p->state >= MODULE_STATE_LIVE &&
+        p->state <= MODULE_STATE_UNFORMED &&
+        check_name_valid(p->name) &&
+        // may be unset for modules that can also be compiled in-kernel
+        is_within_modules_or_zero(p->init) &&
+        is_within_modules_or_zero(p->exit) &&
+        (p->init || p->exit || p->list.next || p->list.prev) &&
+        // See [1] below (code of list_del() function)
+        (is_canonical_high_or_zero(p->list.next) ||
+	 p->list.next == LIST_POISON1) &&
+        (is_canonical_high_or_zero(p->list.prev) ||
+	 p->list.prev == LIST_POISON2) &&
+        MODSIZE(p) && (MODSIZE(p) % PAGE_SIZE == 0)
+       ) {
+           NITARA_PRINTK("0x%lx: %20s %u\n", \
+	                 (unsigned long)p, p->name, MODSIZE(p));
+         }
+  }
+  NITARA_PRINTK("end check (total gone %lu steps)\n", i);
+  return 0;
+}
+
+#if LINUX_VERSION_CODE > KERNEL_VERSION(5, 5, 19)
+static struct proc_ops nitara2_ops = {
+  .proc_read = showmodule_read,
+  .proc_lseek = default_llseek, // otherwise segfaults
+};
+#else
+// See [2] below (code of __sb_end_read/write() function)
+static struct file_operations nitara2_ops = {
+  .read = showmodule_read,
+  .llseek = default_llseek,
+};
+#endif
+
+struct proc_dir_entry *entry;
+
+int init_module()
+{
+  NITARA_PRINTK("[creating proc entry]\n");
+  entry = proc_create_data("nitara2", S_IRUSR, NULL, &nitara2_ops, NULL);
+  return 0;
+}
+
+void cleanup_module()
+{
+  NITARA_PRINTK("[cleanup proc]\n");
+  proc_remove(entry);
+}
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("ksen-lin <g1inko<at>hotmail[.]com>");
+
+-----END NITARA2.C-----
+
+References
+----------
+
+[1] Code of list_del() function:
+
+/**
+ * list_del - deletes entry from list.
+ * @entry: the element to delete from the list.
+ * Note: list_empty() on entry does not return true after this, the entry is
+ * in an undefined state.
+ */
+static inline void list_del(struct list_head *entry)
+{
+  __list_del_entry(entry);
+  entry->next = LIST_POISON1;
+  entry->prev = LIST_POISON2;
+}
+
+[2] Code of __sb_end_read/write() function:
+
+/*
+ * These are internal functions, please use sb_start_{write,pagefault,intwrite}
+ * instead.
+ */
+static inline void __sb_end_write(struct super_block *sb, int level)
+{
+  percpu_up_read(sb->s_writers.rw_sem + level-1);
+}
+
+static inline void __sb_start_write(struct super_block *sb, int level)
+{
+  percpu_down_read(sb->s_writers.rw_sem + level - 1);
+}
+
+
+|=[ EOF ]=---------------------------------------------------------------=|
